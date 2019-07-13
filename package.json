@@ -1,6 +1,6 @@
 {
   "name": "scss-properties",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Facilitates the work of scss / sass to work with css properties",
   "main": "index.scss",
   "homepage": "https://github.com/kldkv/scss-properties",
@@ -13,6 +13,11 @@
   "engines": {
     "node": ">=10.0.0"
   },
+  "files": [
+    "index.scss",
+    "sass/",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/kldkv/scss-properties.git"
