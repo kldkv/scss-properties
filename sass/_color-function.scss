@@ -1,5 +1,5 @@
-@import '_var';
-@import '_utils';
+@import 'var';
+@import 'utils';
 
 @function color\adjust($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
   $hue-color:        _calcProperty($hue, $colorName, $POSTFIX-HUE, $UNIT-DEG, $ADJUST);
@@ -26,6 +26,7 @@
     @if ($colorName == 'color') {
       $name: #{$parent};
     }
+
     $color: map-get($colorMap, $colorName);
 
     $isColor: type-of($color) == 'color';
@@ -54,6 +55,8 @@
       @if ($isAlpha) {
         #{$name-a}: alpha($color);
       }
+    } @else {
+      #{$name}: $color;
     }
   }
 };
