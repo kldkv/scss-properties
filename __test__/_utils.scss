@@ -1,0 +1,7 @@
+@function flip($first, $second) {
+  @if (round(random()) == 1) {
+    @return $first;
+  }
+
+  @return $second;
+}

@@ -1,0 +1,22 @@
+@import 'true';
+
+@import '../sass/var';
+
+@include describe('var') {
+  @include it('All vars must be') {
+		$vars: (
+			ADJUST,
+			CHANGE,
+			UNIT-DEG,
+			UNIT-PERCENT,
+			POSTFIX-HUE,
+			POSTFIX-SATURATION,
+			POSTFIX-LIGHTNESS,
+			POSTFIX-ALPHA,
+		);
+
+		@each $var in $vars {
+			@include assert-true(variable-exists($var));
+		}
+  }
+}

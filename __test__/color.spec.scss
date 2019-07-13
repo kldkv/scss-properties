@@ -1,0 +1,41 @@
+@import 'true';
+
+@import '../sass/color';
+@import '../sass/var';
+@import '../sass/utils';
+
+@include describe('color') {
+  @include it('Correct create HSL/HSLA') {
+
+    @for $i from 1 through 10 {
+      $hue:        #{random($limit: 361) - 1}#{$UNIT-DEG};
+      $saturation: #{random($limit: 101) - 1}#{$UNIT-PERCENT};
+      $lightness:  #{random($limit: 101) - 1}#{$UNIT-PERCENT};
+
+      // parseInt($alpha.toFixed(2), 10);
+      $alpha: _to-number(str-slice(unquote(#{random()}), 0, -4));
+      $has-alpha: round(random()) == 1;
+  
+      @if($has-alpha and $alpha < 1) {
+        @include assert-equal(
+          _makeHSL(
+            $hue: $hue,
+            $saturation: $saturation,
+            $lightness: $lightness,
+            $alpha: $alpha,
+          ),
+          unquote('hsla(#{$hue}, #{$saturation}, #{$lightness}, #{$alpha})')
+        );
+      } @else {
+        @include assert-equal(
+          _makeHSL(
+            $hue: $hue,
+            $saturation: $saturation,
+            $lightness: $lightness,
+          ),
+          unquote('hsl(#{$hue}, #{$saturation}, #{$lightness})')
+        );
+      }
+    }
+  }
+}

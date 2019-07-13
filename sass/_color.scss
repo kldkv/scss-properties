@@ -1,0 +1,7 @@
+@function _makeHSL($hue: null, $saturation: null, $lightness: null, $alpha: null) {
+  @if ($alpha) {
+    @return #{unquote('hsla(#{$hue}, #{$saturation}, #{$lightness}, #{$alpha})')}
+  }
+
+  @return #{unquote('hsl(#{$hue}, #{$saturation}, #{$lightness})')};
+}

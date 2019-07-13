@@ -1,0 +1,59 @@
+@import '_var';
+@import '_utils';
+
+@function color\adjust($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
+  $hue-color:        _calcProperty($hue, $colorName, $POSTFIX-HUE, $UNIT-DEG, $ADJUST);
+  $saturation-color: _calcProperty($saturation, $colorName, $POSTFIX-SATURATION, $UNIT-PERCENT, $ADJUST);
+  $lightness-color:  _calcProperty($lightness, $colorName, $POSTFIX-LIGHTNESS, $UNIT-PERCENT, $ADJUST);
+  $alpha-color:      _calcPropertyAlpha($alpha, $color, $colorName, $ADJUST);
+
+  @return _makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
+};
+
+@function color\change($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
+  $hue-color:        _calcProperty($hue, $colorName, $POSTFIX-HUE, $UNIT-DEG, $CHANGE);
+  $saturation-color: _calcProperty($saturation, $colorName, $POSTFIX-SATURATION, $UNIT-PERCENT, $CHANGE);
+  $lightness-color:  _calcProperty($lightness, $colorName, $POSTFIX-LIGHTNESS, $UNIT-PERCENT, $CHANGE);
+  $alpha-color:      _calcPropertyAlpha($alpha, $color, $colorName, $CHANGE);
+
+  @return _makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
+};
+
+@mixin define\hsl($colorMap, $parent: '') {
+  @each $colorName in map-keys($colorMap) {
+    $name: #{$parent}#{$colorName};
+
+    @if ($colorName == 'color') {
+      $name: #{$parent};
+    }
+    $color: map-get($colorMap, $colorName);
+
+    $isColor: type-of($color) == 'color';
+    $isMap: type-of($color) == 'map';
+    $isAlpha: $isColor and alpha($color) != 1;
+
+    @if ($isMap) {
+      @include define\hsl($color, $name);
+    } @else if ($isColor) {
+      $name-h: #{$name}#{$POSTFIX-HUE};
+      $name-s: #{$name}#{$POSTFIX-SATURATION};
+      $name-l: #{$name}#{$POSTFIX-LIGHTNESS};
+      $name-a: #{$name}#{$POSTFIX-ALPHA};
+
+      @if ($isAlpha) {
+        #{$name}: _makeHSL(var($name-h), var($name-s), var($name-l), var($name-a));
+
+      } @else {
+        #{$name}: _makeHSL(var($name-h), var($name-s), var($name-l));
+      }
+
+      #{$name-h}: hue($color);
+      #{$name-s}: saturation($color);
+      #{$name-l}: lightness($color);
+
+      @if ($isAlpha) {
+        #{$name-a}: alpha($color);
+      }
+    }
+  }
+};
