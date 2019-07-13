@@ -20,43 +20,45 @@
 };
 
 @mixin define\hsl($colorMap, $parent: '') {
-  @each $colorName in map-keys($colorMap) {
-    $name: #{$parent}#{$colorName};
-
-    @if ($colorName == 'color') {
-      $name: #{$parent};
-    }
-
-    $color: map-get($colorMap, $colorName);
-
-    $isColor: type-of($color) == 'color';
-    $isMap: type-of($color) == 'map';
-    $isAlpha: $isColor and alpha($color) != 1;
-
-    @if ($isMap) {
-      @include define\hsl($color, $name);
-    } @else if ($isColor) {
-      $name-h: #{$name}#{$POSTFIX-HUE};
-      $name-s: #{$name}#{$POSTFIX-SATURATION};
-      $name-l: #{$name}#{$POSTFIX-LIGHTNESS};
-      $name-a: #{$name}#{$POSTFIX-ALPHA};
-
-      @if ($isAlpha) {
-        #{$name}: _makeHSL(var($name-h), var($name-s), var($name-l), var($name-a));
-
+  @if (type-of($colorMap) == 'map') {
+    @each $colorName in map-keys($colorMap) {
+      $name: #{$parent}#{$colorName};
+  
+      @if ($colorName == 'color') {
+        $name: #{$parent};
+      }
+  
+      $color: map-get($colorMap, $colorName);
+  
+      $isColor: type-of($color) == 'color';
+      $isMap: type-of($color) == 'map';
+      $isAlpha: $isColor and alpha($color) != 1;
+  
+      @if ($isMap) {
+        @include define\hsl($color, $name);
+      } @else if ($isColor) {
+        $name-h: #{$name}#{$POSTFIX-HUE};
+        $name-s: #{$name}#{$POSTFIX-SATURATION};
+        $name-l: #{$name}#{$POSTFIX-LIGHTNESS};
+        $name-a: #{$name}#{$POSTFIX-ALPHA};
+  
+        @if ($isAlpha) {
+          #{$name}: _makeHSL(var($name-h), var($name-s), var($name-l), var($name-a));
+  
+        } @else {
+          #{$name}: _makeHSL(var($name-h), var($name-s), var($name-l));
+        }
+  
+        #{$name-h}: hue($color);
+        #{$name-s}: saturation($color);
+        #{$name-l}: lightness($color);
+  
+        @if ($isAlpha) {
+          #{$name-a}: alpha($color);
+        }
       } @else {
-        #{$name}: _makeHSL(var($name-h), var($name-s), var($name-l));
+        #{$name}: $color;
       }
-
-      #{$name-h}: hue($color);
-      #{$name-s}: saturation($color);
-      #{$name-l}: lightness($color);
-
-      @if ($isAlpha) {
-        #{$name-a}: alpha($color);
-      }
-    } @else {
-      #{$name}: $color;
     }
-  }
+  };
 };
