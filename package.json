@@ -1,16 +1,25 @@
 {
-  "name": "scss-prop",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "scss-properties",
+  "version": "0.0.1",
+  "description": "Facilitates the work of scss / sass to work with css properties",
+  "main": "index.scss",
+  "homepage": "https://github.com/kldkv/scss-properties",
+  "bugs": "https://github.com/kldkv/scss-properties/issues",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
     "start": "node-sass --watch ./index.scss -o ./ --outputStyle expanded"
   },
-  "keywords": [],
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kldkv/scss-properties.git"
+  },
+  "keywords": ["css-var", "css-properties", "sass", "scss", "color", "mixin"],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "glob": "^7.1.4",
     "jest": "^24.8.0",
