@@ -51,6 +51,8 @@ compile to
 
 You can use some function
 ```scss
+$brand: hsl(200, 56%, 33%);
+
 :root {
   @include define\hsl((
     --brand: $brand,
@@ -84,6 +86,8 @@ You can use some function
 
 And mix its
 ```scss
+$brand: hsl(200, 56%, 33%);
+
 :root {
   @include define\hsl((
     --brand: (
