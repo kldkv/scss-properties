@@ -65,7 +65,7 @@ $brand: hsl(200, 56%, 33%);
   --brand-new-08: #{color\change(--brand, $brand, $hue: 50, $alpha: 0.8)};
 }
 ```
-
+compile to
 ```css
 :root {
   // define\hsl
