@@ -19,7 +19,7 @@
   @return _makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
 };
 
-@mixin define\hsl($colorMap, $parent: '') {
+@mixin color\define($colorMap, $parent: '') {
   @if (type-of($colorMap) == 'map') {
     @each $colorName in map-keys($colorMap) {
       $name: #{$parent}#{$colorName};
@@ -35,7 +35,7 @@
       $isAlpha: $isColor and alpha($color) != 1;
   
       @if ($isMap) {
-        @include define\hsl($color, $name);
+        @include color\define($color, $name);
       } @else if ($isColor) {
         $name-h: #{$name}#{$POSTFIX-HUE};
         $name-s: #{$name}#{$POSTFIX-SATURATION};

@@ -1,10 +1,12 @@
 # scss-properties
 
+Set of mixins for theming and workflow with power of scss and css properties.
+
 ```scss
-$brand: hsl(200, 56%, 33%);
+$brand: rgb(37, 100, 131);
 
 :root {
-  @include define\hsl((
+  @include color\define((
     --brand: $brand
   ));
 }
@@ -19,14 +21,14 @@ compile to
 }
 ```
 
-You can use nested define var
+You can use nested define variables
 
 ```scss
 $brand: hsl(200, 56%, 33%);
 $brand-green: green;
 
 :root {
-  @include define\hsl((
+  @include color\define((
     --brand: (
       color: $brand,
       --green: $brand-green
@@ -54,7 +56,7 @@ You can use some function
 $brand: hsl(200, 56%, 33%);
 
 :root {
-  @include define\hsl((
+  @include color\define((
     --brand: $brand,
   ));
 
@@ -68,7 +70,7 @@ $brand: hsl(200, 56%, 33%);
 compile to
 ```css
 :root {
-  // define\hsl
+  // color\define
   --brand: hsl(var(--brand-h), var(--brand-s), var(--brand-l));
   --brand-h: 200deg;
   --brand-s: 56%;
@@ -89,7 +91,7 @@ And mix its
 $brand: hsl(200, 56%, 33%);
 
 :root {
-  @include define\hsl((
+  @include color\define((
     --brand: (
       color: $brand,
       --dark: #{color\adjust(--brand, $brand, $saturation: -20)}

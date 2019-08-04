@@ -1,6 +1,6 @@
 {
   "name": "scss-properties",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "Facilitates the work of scss / sass to work with css properties",
   "main": "index.scss",
   "homepage": "https://github.com/kldkv/scss-properties",
@@ -22,13 +22,23 @@
     "type": "git",
     "url": "https://github.com/kldkv/scss-properties.git"
   },
-  "keywords": ["css-var", "css-properties", "sass", "scss", "color", "mixin"],
+  "keywords": [
+    "css-var",
+    "css-properties",
+    "sass",
+    "scss",
+    "color",
+    "mixin"
+  ],
   "author": "Alexander Kladkov",
   "license": "MIT",
+  "peerDependencies": {
+    "node-sass": "^4.8.3"
+  },
   "devDependencies": {
+    "node-sass": "^4.8.3",
     "glob": "^7.1.4",
     "jest": "^24.8.0",
-    "node-sass": "^4.8.3",
     "sass-true": "^5.0.0"
   }
 }
