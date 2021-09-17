@@ -1,6 +1,7 @@
-@import 'true';
+@use '../node_modules/sass-true/sass/true' as *;
 
-@import '../sass/var';
+@use 'sass:meta';
+@use '../sass/var';
 
 @include describe('var') {
   @include it('All vars must be') {
@@ -16,7 +17,7 @@
 		);
 
 		@each $var in $vars {
-			@include assert-true(variable-exists($var));
+			@include assert-true(meta.global-variable-exists($var, 'var'));
 		}
   }
 }

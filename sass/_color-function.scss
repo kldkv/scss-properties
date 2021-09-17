@@ -1,60 +1,64 @@
-@import 'var';
-@import 'utils';
+@use 'sass:color';
+@use 'sass:map';
+@use 'sass:meta';
+@use 'var';
+@use 'utils';
+@use 'color' as sass-color;
 
 @function color\adjust($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
-  $hue-color:        _calcProperty($hue, $colorName, $POSTFIX-HUE, $UNIT-DEG, $ADJUST);
-  $saturation-color: _calcProperty($saturation, $colorName, $POSTFIX-SATURATION, $UNIT-PERCENT, $ADJUST);
-  $lightness-color:  _calcProperty($lightness, $colorName, $POSTFIX-LIGHTNESS, $UNIT-PERCENT, $ADJUST);
-  $alpha-color:      _calcPropertyAlpha($alpha, $color, $colorName, $ADJUST);
+  $hue-color:        utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$ADJUST);
+  $saturation-color: utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$ADJUST);
+  $lightness-color:  utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$ADJUST);
+  $alpha-color:      utils.calcPropertyAlpha($alpha, $color, $colorName, var.$ADJUST);
 
-  @return _makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
+  @return sass-color.makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
 };
 
 @function color\change($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
-  $hue-color:        _calcProperty($hue, $colorName, $POSTFIX-HUE, $UNIT-DEG, $CHANGE);
-  $saturation-color: _calcProperty($saturation, $colorName, $POSTFIX-SATURATION, $UNIT-PERCENT, $CHANGE);
-  $lightness-color:  _calcProperty($lightness, $colorName, $POSTFIX-LIGHTNESS, $UNIT-PERCENT, $CHANGE);
-  $alpha-color:      _calcPropertyAlpha($alpha, $color, $colorName, $CHANGE);
+  $hue-color:        utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$CHANGE);
+  $saturation-color: utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$CHANGE);
+  $lightness-color:  utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$CHANGE);
+  $alpha-color:      utils.calcPropertyAlpha($alpha, $color, $colorName, var.$CHANGE);
 
-  @return _makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
+  @return sass-color.makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
 };
 
 @mixin color\define($colorMap, $parent: '') {
-  @if (type-of($colorMap) == 'map') {
-    @each $colorName in map-keys($colorMap) {
+  @if (meta.type-of($colorMap) == 'map') {
+    @each $colorName in map.keys($colorMap) {
       $name: #{$parent}#{$colorName};
   
       @if ($colorName == 'color') {
         $name: #{$parent};
       }
   
-      $color: map-get($colorMap, $colorName);
+      $color: map.get($colorMap, $colorName);
   
-      $isColor: type-of($color) == 'color';
-      $isMap: type-of($color) == 'map';
-      $isAlpha: $isColor and alpha($color) != 1;
+      $isColor: meta.type-of($color) == 'color';
+      $isMap: meta.type-of($color) == 'map';
+      $isAlpha: $isColor and color.alpha($color) != 1;
   
       @if ($isMap) {
         @include color\define($color, $name);
       } @else if ($isColor) {
-        $name-h: #{$name}#{$POSTFIX-HUE};
-        $name-s: #{$name}#{$POSTFIX-SATURATION};
-        $name-l: #{$name}#{$POSTFIX-LIGHTNESS};
-        $name-a: #{$name}#{$POSTFIX-ALPHA};
+        $name-h: #{$name}#{var.$POSTFIX-HUE};
+        $name-s: #{$name}#{var.$POSTFIX-SATURATION};
+        $name-l: #{$name}#{var.$POSTFIX-LIGHTNESS};
+        $name-a: #{$name}#{var.$POSTFIX-ALPHA};
   
         @if ($isAlpha) {
-          #{$name}: _makeHSL(var($name-h), var($name-s), var($name-l), var($name-a));
+          #{$name}: sass-color.makeHSL(var($name-h), var($name-s), var($name-l), var($name-a));
   
         } @else {
-          #{$name}: _makeHSL(var($name-h), var($name-s), var($name-l));
+          #{$name}: sass-color.makeHSL(var($name-h), var($name-s), var($name-l));
         }
   
-        #{$name-h}: hue($color);
-        #{$name-s}: saturation($color);
-        #{$name-l}: lightness($color);
+        #{$name-h}: color.hue($color);
+        #{$name-s}: color.saturation($color);
+        #{$name-l}: color.lightness($color);
   
         @if ($isAlpha) {
-          #{$name-a}: alpha($color);
+          #{$name-a}: color.alpha($color);
         }
       } @else {
         #{$name}: $color;

@@ -1,37 +1,40 @@
-@import 'true';
-@import 'var';
-@import 'utils';
+@use '../node_modules/sass-true/sass/true' as *;
 
-@import '../sass/utils';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'sass:string';
+@use 'var';
+@use 'utils' as test-utils;
+@use '../sass/utils';
 
 @include describe('utils') {
   @include it('Correct create var()') {
-    $r: unique-id();
+    $r: string.unique-id();
     $name: --#{$r};
 
-    @include assert-equal(_var($name), 'var(--#{$r})');
+    @include assert-equal(utils.mkvar($name), 'var(--#{$r})');
   };
 
   @include it('Correct create calc()') {
-    $r: unique-id();
+    $r: string.unique-id();
 
-    @include assert-equal(_calc($r), 'calc(#{$r})');
+    @include assert-equal(utils.mkcalc($r), 'calc(#{$r})');
   };
 
   @include it('Correct create calc() with var()') {
-    $r: unique-id();
+    $r: string.unique-id();
     $name: --#{$r};
-    $var: _var($name);
+    $var: utils.mkvar($name);
 
-    @include assert-equal(_calc(_var($name)), 'calc(var(--#{$r}))');
+    @include assert-equal(utils.mkcalc(utils.mkvar($name)), 'calc(var(--#{$r}))');
   };
   
   @include it('Correct create calc() with var()') {
-    $r: unique-id();
+    $r: string.unique-id();
     $name: --#{$r};
-    $var: _var($name);
+    $var: utils.mkvar($name);
 
-    @include assert-equal(_calc(_var($name)), 'calc(var(--#{$r}))');
+    @include assert-equal(utils.mkcalc(utils.mkvar($name)), 'calc(var(--#{$r}))');
   };
 
   @include it('Correct convert to value to unit') {
@@ -63,22 +66,23 @@
     );
     
     @each $key, $zero-unit in $units {
-      $r: random($limit: $MAX-INTEGER);
-      $value: flip($r, -$r);
+      $r: math.random($limit: var.$MAX-INTEGER);
+      $value: test-utils.flip($r, -$r);
 
-      @include assert-equal(_to-unit($value, $key), $value + $zero-unit);
+      @include assert-equal(utils.to-unit($value, $key), $value + $zero-unit);
     }
   };
 
   @include it('Correct convert to number') {
     @for $var from 1 to 10 {
-      $r: random($limit: $MAX-INTEGER);
-      $float: flip($r + random(), $r);
-      $value: flip($float, -$float);
+      $r: math.random($limit: var.$MAX-INTEGER);
+      $float: test-utils.flip($r + random(), $r);
+      $value: test-utils.flip($float, -$float);
   
-      $string: inspect($value);
-  
-      @include assert-equal(_to-number($string), $value, $inspect: true);
+      // $string: meta.inspect($value);
+      $string: '#{$value}';
+
+      @include assert-equal(utils.to-number($string), $value, $inspect: true);
     }
   };
 
@@ -87,7 +91,7 @@
     $s-exp: '--brand-color)';
     $s-exp-exp: '--brand-color';
 
-    @include assert-equal(_str-replace($s, 'var('), $s-exp);
-    @include assert-equal(_str-replace($s-exp, ')'), $s-exp-exp);
+    @include assert-equal(utils.str-replace($s, 'var('), $s-exp);
+    @include assert-equal(utils.str-replace($s-exp, ')'), $s-exp-exp);
   }
 }

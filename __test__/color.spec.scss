@@ -1,39 +1,41 @@
-@import 'true';
+@use '../node_modules/sass-true/sass/true' as *;
 
-@import '../sass/color';
-@import '../sass/var';
-@import '../sass/utils';
+@use 'sass:math';
+@use 'sass:string';
+@use '../sass/color' as sass-color;
+@use '../sass/var';
+@use '../sass/utils';
 
 @include describe('color') {
   @include it('Correct create HSL/HSLA') {
 
     @for $i from 1 through 10 {
-      $hue:        #{random($limit: 361) - 1}#{$UNIT-DEG};
-      $saturation: #{random($limit: 101) - 1}#{$UNIT-PERCENT};
-      $lightness:  #{random($limit: 101) - 1}#{$UNIT-PERCENT};
+      $hue:        #{math.random($limit: 361) - 1}#{var.$UNIT-DEG};
+      $saturation: #{math.random($limit: 101) - 1}#{var.$UNIT-PERCENT};
+      $lightness:  #{math.random($limit: 101) - 1}#{var.$UNIT-PERCENT};
 
       // parseInt($alpha.toFixed(2), 10);
-      $alpha: _to-number(str-slice(unquote(#{random()}), 0, -4));
-      $has-alpha: round(random()) == 1;
+      $alpha: utils.to-number(str-slice(string.unquote(#{math.random()}), 0, -4));
+      $has-alpha: math.round(math.random()) == 1;
   
       @if($has-alpha and $alpha < 1) {
         @include assert-equal(
-          _makeHSL(
+          sass-color.makeHSL(
             $hue: $hue,
             $saturation: $saturation,
             $lightness: $lightness,
             $alpha: $alpha,
           ),
-          unquote('hsla(#{$hue}, #{$saturation}, #{$lightness}, #{$alpha})')
+          string.unquote('hsla(#{$hue}, #{$saturation}, #{$lightness}, #{$alpha})')
         );
       } @else {
         @include assert-equal(
-          _makeHSL(
+          sass-color.makeHSL(
             $hue: $hue,
             $saturation: $saturation,
             $lightness: $lightness,
           ),
-          unquote('hsl(#{$hue}, #{$saturation}, #{$lightness})')
+          string.unquote('hsl(#{$hue}, #{$saturation}, #{$lightness})')
         );
       }
     }

@@ -1,15 +1,24 @@
+@use 'sass:color';
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'sass:string';
+@use 'var';
+
 ///
 /// Decorator for css property var
 ///
 /// @example
 /// // returns var(--brand-color)
-/// _var(--brand-color);
+/// mkvar(--brand-color);
 ///
 /// @param {Any} $property - Initial value
 /// @return {String} - wrapper value with 'var'
 ///
-@function _var($property) {
-  @return #{unquote('var(#{$property})')};
+
+@function mkvar($property) {
+  @return #{string.unquote('var(#{$property})')};
 };
 
 ///
@@ -17,36 +26,36 @@
 ///
 /// @example
 /// // returns calc(var(--brand-color) + 20)
-/// _calc(var(--brand-color) + 20);
+/// mkcalc(var(--brand-color) + 20);
 ///
 /// @param {Any} $property - Initial value
 /// @return {String} - wrapper value with 'calc'
 ///
-@function _calc($property) {
-  @return #{unquote('calc(#{$property})')};
+@function mkcalc($property) {
+  @return #{string.unquote('calc(#{$property})')};
 };
 
-@function _calcProperty($parameter, $colorName, $colorPart, $unit: null, $type: null) {
+@function calcProperty($parameter, $colorName, $colorPart, $unit: null, $type: null) {
   $name: #{$colorName}#{$colorPart};
   $param: #{$parameter}#{$unit};
 
-  @if ($type == $ADJUST) {
-    @if ($parameter and unitless($parameter)) {
-      @return _calc(#{_var($name) + #{$param}});
+  @if ($type == var.$ADJUST) {
+    @if ($parameter and math.is-unitless($parameter)) {
+      @return mkcalc(#{mkvar($name) + #{$param}});
     }
 
     @if ($parameter) {
-      $percentile: #{1 + $parameter / 100};
-      $percentile: _str-replace($percentile, unit(_to-number($percentile)));
+      $percentile: #{1 + $parameter * 0.01};
+      $percentile: str-replace($percentile, math.unit(to-number($percentile)));
 
-      @return _calc(#{_var($name) * #{$percentile}});
+      @return mkcalc('#{mkvar($name)} * #{$percentile}');
     }
 
-    @return _var($name);
+    @return mkvar($name);
   }
 
-  @if ($type == $CHANGE) {
-    @if ($parameter and unitless($parameter)) {
+  @if ($type == var.$CHANGE) {
+    @if ($parameter and math.is-unitless($parameter)) {
       @return $param;
     }
 
@@ -54,28 +63,28 @@
       @return #{$parameter};
     }
 
-    @return _var($name);
+    @return mkvar($name);
   }
 
   @return null;
 }
 
-@function _calcPropertyAlpha($alpha, $color, $colorName, $type: null) {
-  $hasAlpha: alpha($color) != 1;
-  $alphaIsNumber: ($alpha or $hasAlpha) and (type-of($alpha) == 'number');
+@function calcPropertyAlpha($alpha, $color, $colorName, $type: null) {
+  $hasAlpha: color.alpha($color) != 1;
+  $alphaIsNumber: ($alpha or $hasAlpha) and (meta.type-of($alpha) == 'number');
 
-  $property: _var(#{$colorName}#{$POSTFIX-ALPHA});
+  $property: mkvar(#{$colorName}#{var.$POSTFIX-ALPHA});
 
-  @if ($type == $ADJUST) {
-    @if ($alphaIsNumber and unitless($alpha)) {
-      @return _calc(#{$property} + #{$alpha});
+  @if ($type == var.$ADJUST) {
+    @if ($alphaIsNumber and math.is-unitless($alpha)) {
+      @return mkcalc(#{$property} + #{$alpha});
     }
 
     @if ($alphaIsNumber) {
-      $percentile: #{1 + $alpha / 100};
-      $percentile: _str-replace($percentile, unit(_to-number($percentile)));
+      $percentile: #{1 + $alpha * 0.01};
+      $percentile: str-replace($percentile, math.unit(to-number($percentile)));
 
-      @return _calc(#{$property} * #{$percentile});
+      @return mkcalc(#{$property} * #{$percentile});
     }
 
     @if ($hasAlpha) {
@@ -85,14 +94,14 @@
     @return null;
   }
 
-  @if ($type == $CHANGE) {
-    @if ($alphaIsNumber and unitless($alpha)) {
+  @if ($type == var.$CHANGE) {
+    @if ($alphaIsNumber and math.is-unitless($alpha)) {
       @return $alpha;
     }
 
     @if ($alphaIsNumber) {
-      $percentile: #{$alpha / 100};
-      $percentile: _to-number(_str-replace($percentile, unit(_to-number($percentile))));
+      $percentile: #{$alpha * 0.01};
+      $percentile: to-number(str-replace($percentile, math.unit(to-number($percentile))));
 
       @return $percentile;
     }
@@ -115,7 +124,7 @@
 ///
 /// @return {Number} - `$value` expressed in `$unit`
 ///
-@function _to-unit($value, $unit) {
+@function to-unit($value, $unit) {
   $units: (
     '%': 1%,
     'ch': 1ch,
@@ -143,16 +152,16 @@
     'vw': 1vw,
   );
   
-  @if not index(map-keys($units), $unit) {
+  @if not list.index(map.keys($units), $unit) {
     $_: log('Invalid unit `#{$unit}`.');
   }
 
-  @if (type-of($value) != 'number') {
+  @if (meta.type-of($value) != 'number') {
     $_: log('Value for `to-number` should be a number or a string.');
   }
 
-  @if (type-of($value) == 'number') {
-    @return $value * map-get($units, $unit);
+  @if (meta.type-of($value) == 'number') {
+    @return $value * map.get($units, $unit);
   }
 
   @return null;
@@ -165,17 +174,17 @@
 ///
 /// @return {Number}
 ///
-@function _to-number($value) {
-  @if type-of($value) == 'number' {
+@function to-number($value) {
+  @if meta.type-of($value) == 'number' {
     @return $value;
-  } @else if type-of($value) != 'string' {
+  } @else if meta.type-of($value) != 'string' {
     $_: log('Value for `to-number` should be a number or a string.');
   }
   
   $result: 0;
   $decimal: 0;
-  $d: str-index($value, '.');
-  $minus: str-slice($value, 1, 1) == '-';
+  $d: string.index($value, '.');
+  $minus: string.slice($value, 1, 1) == '-';
   $numbers: (
     '0': 0,
     '1': 1,
@@ -190,24 +199,23 @@
   );
 
   @if $d {
-    $decimal: _to-number(str-slice($value, $d + 1));
-    @for $i from 1 through (str-length($value) - $d) {
-      $decimal: $decimal * 0.1;
-    }
-    $value: str-slice($value, 1, $d - 1);
+    $decimal: to-number(string.slice($value, $d + 1));
+    $decimal: math.div($decimal, math.pow(10, string.length($value) - $d));
+    $value: string.slice($value, 1, $d - 1);
   }
   
-  @for $i from if($minus, 2, 1) through str-length($value) {
-    $character: str-slice($value, $i, $i);
-    
-    @if not (index(map-keys($numbers), $character) or ($character == '.')) {
+  @for $i from if($minus, 2, 1) through string.length($value) {
+    $character: string.slice($value, $i, $i);
+    $number: map.get($numbers, $character);
+
+    @if not $number {
       $result: $result + $decimal;
-      @return _to-unit(if($minus, -$result, $result), str-slice($value, $i))
+      @return to-unit(if($minus, -$result, $result), string.slice($value, $i))
     }
 
-    $result: $result * 10 + map-get($numbers, $character);
+    $result: $result * 10 + $number;
   }
-  
+
   $result: $result + $decimal;
   @return if($minus, -$result, $result);;
 };
@@ -219,14 +227,14 @@
 /// @param {String} $search - Substring to replace
 /// @param {String} $replace ('') - New value
 /// @return {String} - Updated string
-@function _str-replace($string, $search, $replace: '') {
-  $index: str-index($string, $search);
+@function str-replace($string, $search, $replace: '') {
+  $index: string.index($string, $search);
   
   @if $index {
-    @return str-slice($string, 1, $index - 1)
+    @return string.slice($string, 1, $index - 1)
     + $replace
-    + _str-replace(
-        str-slice($string, $index + str-length($search)),
+    + str-replace(
+        string.slice($string, $index + string.length($search)),
           $search,
           $replace
         );

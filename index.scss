@@ -1,4 +1,2 @@
-@import 'sass/var';
-@import 'sass/utils';
-@import 'sass/color';
-@import 'sass/color-function';
+@forward 'sass/var';
+@forward 'sass/color-function';
