@@ -5,7 +5,7 @@
 @use 'utils';
 @use 'color' as sass-color;
 
-@function color\adjust($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
+@function adjust($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
   $hue-color:        utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$ADJUST);
   $saturation-color: utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$ADJUST);
   $lightness-color:  utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$ADJUST);
@@ -14,7 +14,7 @@
   @return sass-color.makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
 };
 
-@function color\change($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
+@function change($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
   $hue-color:        utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$CHANGE);
   $saturation-color: utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$CHANGE);
   $lightness-color:  utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$CHANGE);
@@ -23,7 +23,7 @@
   @return sass-color.makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
 };
 
-@mixin color\define($colorMap, $parent: '') {
+@mixin define($colorMap, $parent: '') {
   @if (meta.type-of($colorMap) == 'map') {
     @each $colorName in map.keys($colorMap) {
       $name: #{$parent}#{$colorName};
@@ -39,7 +39,7 @@
       $isAlpha: $isColor and color.alpha($color) != 1;
   
       @if ($isMap) {
-        @include color\define($color, $name);
+        @include define($color, $name);
       } @else if ($isColor) {
         $name-h: #{$name}#{var.$POSTFIX-HUE};
         $name-s: #{$name}#{var.$POSTFIX-SATURATION};
