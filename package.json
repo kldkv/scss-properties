@@ -6,9 +6,8 @@
   "homepage": "https://github.com/kldkv/scss-properties",
   "bugs": "https://github.com/kldkv/scss-properties/issues",
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "start": "node-sass --watch ./index.scss -o ./ --outputStyle expanded"
+    "test": "jest --env=node",
+    "test:watch": "jest --env=node --watch"
   },
   "engines": {
     "node": ">=10.0.0"
@@ -32,13 +31,10 @@
   ],
   "author": "Alexander Kladkov",
   "license": "MIT",
-  "peerDependencies": {
-    "node-sass": "^4.8.3"
-  },
   "devDependencies": {
-    "node-sass": "^4.8.3",
     "glob": "^7.1.4",
     "jest": "^24.8.0",
-    "sass-true": "^5.0.0"
+    "sass": "^1.41.0",
+    "sass-true": "^6.0.1"
   }
 }
