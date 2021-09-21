@@ -5,25 +5,33 @@
 @use 'utils';
 @use 'color' as sass-color;
 
-@function adjust($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
+$_alpha: ();
+@function _hasAlpha($colorName) {
+  @if not map.has-key($_alpha, $colorName) {
+    @error '#{$colorName} is not a defined color.';
+  }
+  @return map.get($_alpha, $colorName);
+}
+
+@function adjust($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
   $hue-color:        utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$ADJUST);
   $saturation-color: utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$ADJUST);
   $lightness-color:  utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$ADJUST);
-  $alpha-color:      utils.calcPropertyAlpha($alpha, $color, $colorName, var.$ADJUST);
+  $alpha-color:      utils.calcPropertyAlpha($alpha, $colorName, var.$ADJUST, _hasAlpha($colorName));
 
   @return sass-color.makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
 };
 
-@function change($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
+@function change($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
   $hue-color:        utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$CHANGE);
   $saturation-color: utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$CHANGE);
   $lightness-color:  utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$CHANGE);
-  $alpha-color:      utils.calcPropertyAlpha($alpha, $color, $colorName, var.$CHANGE);
+  $alpha-color:      utils.calcPropertyAlpha($alpha, $colorName, var.$CHANGE, _hasAlpha($colorName));
 
   @return sass-color.makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
 };
 
-@mixin define($colorMap, $parent: '') {
+@mixin define($colorMap, $parent: '', $forceAlpha: true) {
   @if (meta.type-of($colorMap) == 'map') {
     @each $colorName in map.keys($colorMap) {
       $name: #{$parent}#{$colorName};
@@ -36,10 +44,10 @@
   
       $isColor: meta.type-of($color) == 'color';
       $isMap: meta.type-of($color) == 'map';
-      $isAlpha: $isColor and color.alpha($color) != 1;
+      $isAlpha: $forceAlpha or ($isColor and color.alpha($color) != 1);
   
       @if ($isMap) {
-        @include define($color, $name);
+        @include define($color, $parent: $name);
       } @else if ($isColor) {
         $name-h: #{$name}#{var.$POSTFIX-HUE};
         $name-s: #{$name}#{var.$POSTFIX-SATURATION};
@@ -48,7 +56,6 @@
   
         @if ($isAlpha) {
           #{$name}: sass-color.makeHSL(var($name-h), var($name-s), var($name-l), var($name-a));
-  
         } @else {
           #{$name}: sass-color.makeHSL(var($name-h), var($name-s), var($name-l));
         }
@@ -60,6 +67,8 @@
         @if ($isAlpha) {
           #{$name-a}: color.alpha($color);
         }
+
+        $_alpha: map.merge($_alpha, (#{$name}: $isAlpha)) !global;
       } @else {
         #{$name}: $color;
       }

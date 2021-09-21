@@ -69,8 +69,7 @@
   @return null;
 }
 
-@function calcPropertyAlpha($alpha, $color, $colorName, $type: null) {
-  $hasAlpha: color.alpha($color) != 1;
+@function calcPropertyAlpha($alpha, $colorName, $type: null, $hasAlpha: null) {
   $alphaIsNumber: ($alpha or $hasAlpha) and (meta.type-of($alpha) == 'number');
 
   $property: mkvar(#{$colorName}#{var.$POSTFIX-ALPHA});
@@ -90,8 +89,6 @@
     @if ($hasAlpha) {
       @return $property;
     }
-
-    @return null;
   }
 
   @if ($type == var.$CHANGE) {
@@ -109,8 +106,6 @@
     @if ($hasAlpha) {
       @return $property;
     }
-
-    @return null;
   }
 
   @return null;
