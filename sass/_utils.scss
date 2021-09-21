@@ -205,8 +205,8 @@
   }
 
   $result: $result + $decimal;
-  @return if($minus, -$result, $result);;
-};
+  @return if($minus, -$result, $result);
+}
 
 /// Replace `$search` with `$replace` in `$string`
 // credits: https://css-tricks.com/snippets/sass/_str-replace-function/

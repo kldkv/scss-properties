@@ -20,7 +20,7 @@ $_alpha: ();
   $alpha-color:      utils.calcPropertyAlpha($alpha, $colorName, var.$ADJUST, _hasAlpha($colorName));
 
   @return sass-color.makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
-};
+}
 
 @function change($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
   $hue-color:        utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$CHANGE);
@@ -73,5 +73,5 @@ $_alpha: ();
         #{$name}: $color;
       }
     }
-  };
-};
+  }
+}
