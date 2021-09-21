@@ -84,11 +84,8 @@
       $percentile: 1 + math.div($alpha, 100%);
       @return if($hasAlpha, mkcalc('#{$property} * #{$percentile}'), #{$percentile});
     }
-
-    @if ($hasAlpha) {
-      @return $property;
-    }
   }
+
 
   @if ($type == var.$CHANGE) {
     @if ($alphaIsNumber and math.is-unitless($alpha)) {
@@ -98,10 +95,10 @@
     @if ($alphaIsNumber) {
       @return #{math.div($alpha, 100%)};
     }
+  }
 
-    @if ($hasAlpha) {
-      @return $property;
-    }
+  @if ($type == var.$ADJUST or $type == var.$CHANGE and $hasAlpha) {
+    @return $property;
   }
 
   @return null;
