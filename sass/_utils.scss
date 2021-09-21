@@ -38,10 +38,11 @@
 @function calcProperty($parameter, $colorName, $colorPart, $unit: null, $type: null) {
   $name: #{$colorName}#{$colorPart};
   $param: #{$parameter}#{$unit};
+  $var: mkvar($name);
 
   @if ($type == var.$ADJUST) {
     @if ($parameter and math.is-unitless($parameter)) {
-      @return mkcalc('#{mkvar($name)} + #{$param}');
+      @return mkcalc('#{$var} + #{$param}');
     }
 
     @if ($parameter) {
@@ -51,7 +52,7 @@
       @return mkcalc('#{mkvar($name)} * #{$percentile}');
     }
 
-    @return mkvar($name);
+    @return $var;
   }
 
   @if ($type == var.$CHANGE) {
@@ -63,7 +64,7 @@
       @return #{$parameter};
     }
 
-    @return mkvar($name);
+    @return $var;
   }
 
   @return null;
