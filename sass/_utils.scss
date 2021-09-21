@@ -18,7 +18,7 @@
 ///
 
 @function mkvar($property) {
-  @return #{string.unquote('var(#{$property})')};
+  @return string.unquote('var(#{$property})');
 };
 
 ///
@@ -26,13 +26,13 @@
 ///
 /// @example
 /// // returns calc(var(--brand-color) + 20)
-/// mkcalc(var(--brand-color) + 20);
+/// mkcalc('var(--brand-color) + 20');
 ///
 /// @param {Any} $property - Initial value
 /// @return {String} - wrapper value with 'calc'
 ///
 @function mkcalc($property) {
-  @return #{string.unquote('calc(#{$property})')};
+  @return string.unquote('calc(#{$property})');
 };
 
 @function calcProperty($parameter, $colorName, $colorPart, $unit: null, $type: null) {
@@ -41,7 +41,7 @@
 
   @if ($type == var.$ADJUST) {
     @if ($parameter and math.is-unitless($parameter)) {
-      @return mkcalc(#{mkvar($name) + #{$param}});
+      @return mkcalc('#{mkvar($name)} + #{$param}');
     }
 
     @if ($parameter) {
@@ -76,14 +76,12 @@
 
   @if ($type == var.$ADJUST) {
     @if ($alphaIsNumber and math.is-unitless($alpha)) {
-      @return mkcalc(#{$property} + #{$alpha});
+      @return mkcalc('#{$property} + #{$alpha}');
     }
 
     @if ($alphaIsNumber) {
-      $percentile: #{1 + $alpha * 0.01};
-      $percentile: str-replace($percentile, math.unit(to-number($percentile)));
-
-      @return mkcalc(#{$property} * #{$percentile});
+      $percentile: 1 + math.div($alpha, 100%);
+      @return mkcalc('#{$property} * #{$percentile}');
     }
 
     @if ($hasAlpha) {
@@ -97,10 +95,7 @@
     }
 
     @if ($alphaIsNumber) {
-      $percentile: #{$alpha * 0.01};
-      $percentile: to-number(str-replace($percentile, math.unit(to-number($percentile))));
-
-      @return $percentile;
+      @return #{math.div($alpha, 100%)};
     }
 
     @if ($hasAlpha) {
