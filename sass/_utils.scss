@@ -86,7 +86,6 @@
     }
   }
 
-
   @if ($type == var.$CHANGE) {
     @if ($alphaIsNumber and math.is-unitless($alpha)) {
       @return $alpha;
@@ -102,6 +101,30 @@
   }
 
   @return null;
+}
+
+@function calcMix($colorName1, $colorName2, $weight, $colorPart) {
+  $var1: mkvar(#{$colorName1}#{$colorPart});
+  $var2: mkvar(#{$colorName2}#{$colorPart});
+  $w1: math.div($weight, 100%);
+  $w2: 1 - $w1;
+
+  @return mkcalc('(#{$var1} * #{$w1}) + (#{$var2} * #{$w2})');
+}
+
+@function calcMixAlpha($colorName1, $colorName2, $weight, $hasAlpha1: null, $hasAlpha2: null) {
+  @if (not $hasAlpha1 and not $hasAlpha2) {
+    @return null;
+  }
+
+  $var1: mkvar(#{$colorName1}#{var.$POSTFIX-ALPHA});
+  $var2: mkvar(#{$colorName2}#{var.$POSTFIX-ALPHA});
+  $w1: math.div($weight, 100%);
+  $w2: 1 - $w1;
+  $expr1: if($hasAlpha1, '(#{$var1} * #{$w1})', $w1);
+  $expr2: if($hasAlpha2, '(#{$var2} * #{$w2})', $w2);
+
+  @return mkcalc('#{$expr1} + #{$expr2}');
 }
 
 ///

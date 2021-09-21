@@ -13,6 +13,16 @@ $_alpha: ();
   @return map.get($_alpha, $colorName);
 }
 
+// also allow mixing different values by different weights?
+@function mix($colorName1, $colorName2, $weight: 50%) {
+  $hue-color:        utils.calcMix($colorName1, $colorName2, $weight, var.$POSTFIX-HUE);
+  $saturation-color: utils.calcMix($colorName1, $colorName2, $weight, var.$POSTFIX-SATURATION);
+  $lightness-color:  utils.calcMix($colorName1, $colorName2, $weight, var.$POSTFIX-LIGHTNESS);
+  $alpha-color:      utils.calcMixAlpha($colorName1, $colorName2, $weight, _hasAlpha($colorName1), _hasAlpha($colorName2));
+
+  @return sass-color.makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
+}
+
 @function adjust($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
   $hue-color:        utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$ADJUST);
   $saturation-color: utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$ADJUST);
