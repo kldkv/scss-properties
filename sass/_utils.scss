@@ -76,12 +76,12 @@
 
   @if ($type == var.$ADJUST) {
     @if ($alphaIsNumber and math.is-unitless($alpha)) {
-      @return mkcalc('#{$property} + #{$alpha}');
+      @return if($hasAlpha, mkcalc('#{$property} + #{$alpha}'), #{1 + $alpha});
     }
 
     @if ($alphaIsNumber) {
       $percentile: 1 + math.div($alpha, 100%);
-      @return mkcalc('#{$property} * #{$percentile}');
+      @return if($hasAlpha, mkcalc('#{$property} * #{$percentile}'), #{$percentile});
     }
 
     @if ($hasAlpha) {
