@@ -1,21 +1,44 @@
 @use 'sass:color';
 @use 'sass:map';
+@use 'sass:math';
 @use 'sass:meta';
 @use 'var';
 @use 'utils';
 @use 'color' as sass-color;
 
-$_alpha: ();
+$_colors: ();
+
 @function _hasAlpha($colorName) {
-  @if not map.has-key($_alpha, $colorName) {
+  @if not map.has-key($_colors, $colorName) {
     @error '#{$colorName} is not a defined color.';
   }
-  @return map.get($_alpha, $colorName);
+  @return map.get($_colors, $colorName, 'alpha');
+}
+
+@function _getHueRelations($colorMap: $_colors) {
+  @each $colorName1, $colorProps1 in $_colors {
+    @each $colorName2, $colorProps2 in $_colors {
+      @if ($colorName1 != $colorName2) and not map.has-key($colorProps1, $colorName2) {
+        $hue1: color.hue(map.get($colorProps1, 'color'));
+        $hue2: color.hue(map.get($colorProps2, 'color'));
+        $inverted: math.abs($hue1 - $hue2) > 180deg;
+
+        $colorMap: map.deep-merge($colorMap, (
+          $colorName1: ($colorName2: $inverted),
+          $colorName2: ($colorName1: $inverted)
+        ));
+      }
+    }
+  }
+  @return $colorMap;
 }
 
 // also allow mixing different values by different weights?
-@function mix($colorName1, $colorName2, $weight: 50%) {
-  $hue-color:        utils.calcMix($colorName1, $colorName2, $weight, var.$POSTFIX-HUE);
+@function mix($colorName1, $colorName2, $weight: 50%, $invert-hue: null) {
+  $invert:           map.get($_colors, $colorName1, $colorName2);
+  $invert:           if($invert-hue, not $invert, $invert);
+
+  $hue-color:        utils.calcMix($colorName1, $colorName2, $weight, var.$POSTFIX-HUE, $modify: $invert and -360deg);
   $saturation-color: utils.calcMix($colorName1, $colorName2, $weight, var.$POSTFIX-SATURATION);
   $lightness-color:  utils.calcMix($colorName1, $colorName2, $weight, var.$POSTFIX-LIGHTNESS);
   $alpha-color:      utils.calcMixAlpha($colorName1, $colorName2, $weight, _hasAlpha($colorName1), _hasAlpha($colorName2));
@@ -78,7 +101,12 @@ $_alpha: ();
           #{$name-a}: color.alpha($color);
         }
 
-        $_alpha: map.merge($_alpha, (#{$name}: $isAlpha)) !global;
+        $_colors: map.merge($_colors, (#{$name}: (
+          'color': $color,
+          'alpha': $isAlpha
+        ))) !global;
+        $_colors: _getHueRelations($_colors) !global;
+        @debug $_colors;
       } @else {
         #{$name}: $color;
       }
