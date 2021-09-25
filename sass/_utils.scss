@@ -106,8 +106,12 @@
 @function calcMix($colorName1, $colorName2, $weight, $colorPart, $modify: null) {
   $var1: mkvar(#{$colorName1}#{$colorPart});
   $var2: mkvar(#{$colorName2}#{$colorPart});
-  $w1: math.div($weight, 100%);
-  $w2: 1 - $w1;
+  $w1: #{$weight};
+  $w2: '(1 - #{$weight})';
+  @if meta.type-of($weight) == 'number' {
+    $w1: math.div($weight, 100%);
+    $w2: 1 - $w1;
+  }
 
   @if ($modify) {
     $var1: '(#{$var1} + #{$modify})';
@@ -123,8 +127,12 @@
 
   $var1: mkvar(#{$colorName1}#{var.$POSTFIX-ALPHA});
   $var2: mkvar(#{$colorName2}#{var.$POSTFIX-ALPHA});
-  $w1: math.div($weight, 100%);
-  $w2: 1 - $w1;
+  $w1: #{$weight};
+  $w2: '(1 - #{$weight})';
+  @if meta.type-of($weight) == 'number' {
+    $w1: math.div($weight, 100%);
+    $w2: 1 - $w1;
+  }
   $expr1: if($hasAlpha1, '(#{$var1} * #{$w1})', $w1);
   $expr2: if($hasAlpha2, '(#{$var2} * #{$w2})', $w2);
 
