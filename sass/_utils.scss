@@ -35,68 +35,40 @@
   @return string.unquote('calc(#{$property})');
 };
 
-@function calcProperty($parameter, $colorName, $colorPart, $unit: null, $type: null) {
+@function calcProperty($parameter, $colorName, $colorPart, $unit: 1, $range: 0 1, $type: null) {
   $name: #{$colorName}#{$colorPart};
-  $param: #{$parameter}#{$unit};
-  $var: mkvar($name);
+  $param: if($parameter and math.is-unitless($parameter), $parameter * $unit, $parameter);
+  $property: mkvar($name);
+  $min: list.nth($range, 1);
+  $max: list.nth($range, 2);
 
   @if ($type == var.$ADJUST) {
-    @if ($parameter and math.is-unitless($parameter)) {
-      @return mkcalc('#{$var} + #{$param}');
+    // add or subtract parameter from existing value
+    @if ($param) {
+      @return mkcalc('#{$property} + #{$param}');
     }
-
-    @if ($parameter) {
-      $percentile: #{1 + $parameter * 0.01};
-      $percentile: str-replace($percentile, math.unit(to-number($percentile)));
-
-      @return mkcalc('#{mkvar($name)} * #{$percentile}');
-    }
-
-    @return $var;
+    @return $property;
   }
 
   @if ($type == var.$CHANGE) {
-    @if ($parameter and math.is-unitless($parameter)) {
+    // replace existing value with parameter
+    @if ($param) {
       @return $param;
     }
-
-    @if ($parameter) {
-      @return #{$parameter};
-    }
-
-    @return $var;
+    @return $property;
   }
 
-  @return null;
-}
-
-@function calcPropertyAlpha($alpha, $colorName, $type: null, $hasAlpha: null) {
-  $alphaIsNumber: ($alpha or $hasAlpha) and (meta.type-of($alpha) == 'number');
-
-  $property: mkvar(#{$colorName}#{var.$POSTFIX-ALPHA});
-
-  @if ($type == var.$ADJUST) {
-    @if ($alphaIsNumber and math.is-unitless($alpha)) {
-      @return if($hasAlpha, mkcalc('#{$property} + #{$alpha}'), #{1 + $alpha});
+  @if ($type == var.$SCALE) {
+    // scale existing value relative to its min or max
+    @if ($param) {
+      $percentile: math.div($parameter, 100%);
+      $adjust: if($percentile > 0,
+        '#{$max} - #{$property}',
+        '#{$property} - #{$min}');
+      $adjust: '(#{$adjust}) * #{$percentile}';
+      @return mkcalc('#{$property} + (#{$adjust})');
     }
 
-    @if ($alphaIsNumber) {
-      $percentile: 1 + math.div($alpha, 100%);
-      @return if($hasAlpha, mkcalc('#{$property} * #{$percentile}'), #{$percentile});
-    }
-  }
-
-  @if ($type == var.$CHANGE) {
-    @if ($alphaIsNumber and math.is-unitless($alpha)) {
-      @return $alpha;
-    }
-
-    @if ($alphaIsNumber) {
-      @return #{math.div($alpha, 100%)};
-    }
-  }
-
-  @if ($type == var.$ADJUST or $type == var.$CHANGE and $hasAlpha) {
     @return $property;
   }
 
@@ -104,8 +76,8 @@
 }
 
 @function calcMix($colorName1, $colorName2, $weight, $colorPart, $modify: null) {
-  $var1: mkvar(#{$colorName1}#{$colorPart});
-  $var2: mkvar(#{$colorName2}#{$colorPart});
+  $var1: meta.type-of($colorName1) == 'string' and mkvar(#{$colorName1}#{$colorPart});
+  $var2: meta.type-of($colorName2) == 'string' and mkvar(#{$colorName2}#{$colorPart});
   $w1: #{$weight};
   $w2: '(1 - #{$weight})';
   @if meta.type-of($weight) == 'number' {
@@ -113,29 +85,16 @@
     $w2: 1 - $w1;
   }
 
-  @if ($modify) {
-    $var1: '(#{$var1} + #{$modify})';
+  @if $modify {
+    @if $var1 {
+      $var1: '(#{$var1} + #{$modify})';
+    } @else if $var2 {
+      $var2: '(#{$var2} + #{$modify})';
+    }
   }
 
-  @return mkcalc('(#{$var1} * #{$w1}) + (#{$var2} * #{$w2})');
-}
-
-@function calcMixAlpha($colorName1, $colorName2, $weight, $hasAlpha1: null, $hasAlpha2: null) {
-  @if (not $hasAlpha1 and not $hasAlpha2) {
-    @return null;
-  }
-
-  $var1: mkvar(#{$colorName1}#{var.$POSTFIX-ALPHA});
-  $var2: mkvar(#{$colorName2}#{var.$POSTFIX-ALPHA});
-  $w1: #{$weight};
-  $w2: '(1 - #{$weight})';
-  @if meta.type-of($weight) == 'number' {
-    $w1: math.div($weight, 100%);
-    $w2: 1 - $w1;
-  }
-  $expr1: if($hasAlpha1, '(#{$var1} * #{$w1})', $w1);
-  $expr2: if($hasAlpha2, '(#{$var2} * #{$w2})', $w2);
-
+  $expr1: if(meta.type-of($colorName1) == 'number' and meta.type-of($w1) == 'number', $colorName1 * $w1, '(#{$var1} * #{$w1})');
+  $expr2: if(meta.type-of($colorName2) == 'number' and meta.type-of($w2) == 'number', $colorName2 * $w2, '(#{$var2} * #{$w2})');
   @return mkcalc('#{$expr1} + #{$expr2}');
 }
 

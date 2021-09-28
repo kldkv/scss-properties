@@ -10,9 +10,9 @@
   @include it('Correct create HSL/HSLA') {
 
     @for $i from 1 through 10 {
-      $hue:        #{math.random($limit: 361) - 1}#{var.$UNIT-DEG};
-      $saturation: #{math.random($limit: 101) - 1}#{var.$UNIT-PERCENT};
-      $lightness:  #{math.random($limit: 101) - 1}#{var.$UNIT-PERCENT};
+      $hue:        #{(math.random($limit: 361) - 1) * var.$UNIT-DEG};
+      $saturation: #{(math.random($limit: 101) - 1) * var.$UNIT-PERCENT};
+      $lightness:  #{(math.random($limit: 101) - 1) * var.$UNIT-PERCENT};
 
       // parseInt($alpha.toFixed(2), 10);
       $alpha: utils.to-number(str-slice(string.unquote(#{math.random()}), 0, -4));

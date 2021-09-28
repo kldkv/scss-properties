@@ -1,4 +1,5 @@
 @use 'sass:color';
+@use 'sass:list';
 @use 'sass:map';
 @use 'sass:math';
 @use 'sass:meta';
@@ -8,11 +9,46 @@
 
 $_colors: ();
 
-@function _hasAlpha($colorName) {
+@mixin _hasColor($colorName) {
   @if not map.has-key($_colors, $colorName) {
     @error '#{$colorName} is not a defined color.';
   }
-  @return map.get($_colors, $colorName, 'alpha');
+}
+
+@function _calcAlpha($alpha, $colorName, $type) {
+  @if not $alpha or $alpha == 1 {
+    @return null;
+  }
+
+  @if map.get($_colors, $colorName, 'alpha') {
+    @return utils.calcProperty($alpha, $colorName, var.$POSTFIX-ALPHA, var.$UNIT-ALPHA, var.$RANGE-ALPHA, $type);
+  } @else {
+    $newAlpha: $alpha;
+    $min: list.nth(var.$RANGE-ALPHA, 1);
+    $max: list.nth(var.$RANGE-ALPHA, 2);
+
+    @if (type == var.$ADJUST) {
+      $newAlpha: 1 + $alpha;
+    } @else if ($type == var.$CHANGE) {
+      $newAlpha: $alpha;
+    } @else if ($type == var.$SCALE) {
+      $newAlpha: 1 + math.div($alpha / 100%);
+    }
+
+    @return math.clamp($min, $newAlpha, $max);
+  }
+}
+
+@function _mixAlpha($colorName1, $colorName2, $weight) {
+  $hasAlpha1: map.get($_colors, $colorName1, 'alpha');
+  $hasAlpha2: map.get($_colors, $colorName2, 'alpha');
+  $var1: if($hasAlpha1, $colorName1, list.nth(var.$RANGE-ALPHA, 2));
+  $var2: if($hasAlpha2, $colorName2, list.nth(var.$RANGE-ALPHA, 2));
+
+  @if not $hasAlpha1 and not $hasAlpha2 {
+    @return null;
+  }
+  @return utils.calcMix($var1, $var2, $weight, var.$POSTFIX-ALPHA)
 }
 
 // also allow mixing different values by different weights?
@@ -26,25 +62,34 @@ $_colors: ();
     $hue:         utils.calcMix($colorName1, $colorName2, $hue or $weight, var.$POSTFIX-HUE, $modify: $invert and -360deg),
     $saturation:  utils.calcMix($colorName1, $colorName2, $saturation or $weight, var.$POSTFIX-SATURATION),
     $lightness:   utils.calcMix($colorName1, $colorName2, $lightness or $weight, var.$POSTFIX-LIGHTNESS),
-    $alpha:       utils.calcMixAlpha($colorName1, $colorName2, $alpha or $weight, _hasAlpha($colorName1), _hasAlpha($colorName2)),
+    $alpha:       _mixAlpha($colorName1, $colorName2, $alpha or $weight),
   );
 }
 
 @function adjust($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
   @return sass-color.makeHSL(
-    $hue:         utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$ADJUST),
-    $saturation:  utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$ADJUST),
-    $lightness:   utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$ADJUST),
-    $alpha:       utils.calcPropertyAlpha($alpha, $colorName, var.$ADJUST, _hasAlpha($colorName)),
+    $hue:         utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$RANGE-DEG, var.$ADJUST),
+    $saturation:  utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$RANGE-PERCENT, var.$ADJUST),
+    $lightness:   utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$RANGE-PERCENT, var.$ADJUST),
+    $alpha:       _calcAlpha($alpha, $colorName, var.$ADJUST),
   );
 }
 
 @function change($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
   @return sass-color.makeHSL(
-    $hue:         utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$CHANGE),
-    $saturation:  utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$CHANGE),
-    $lightness:   utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$CHANGE),
-    $alpha:       utils.calcPropertyAlpha($alpha, $colorName, var.$CHANGE, _hasAlpha($colorName)),
+    $hue:         utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$RANGE-DEG, var.$CHANGE),
+    $saturation:  utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$RANGE-PERCENT, var.$CHANGE),
+    $lightness:   utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$RANGE-PERCENT, var.$CHANGE),
+    $alpha:       _calcAlpha($alpha, $colorName, var.$CHANGE),
+  );
+};
+
+@function scale($colorName, $saturation: null, $lightness: null, $alpha: null) {
+  @return sass-color.makeHSL(
+    $hue:         utils.mkvar(#{$colorName}#{var.$POSTFIX-HUE}),
+    $saturation:  utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$RANGE-PERCENT, var.$SCALE),
+    $lightness:   utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$RANGE-PERCENT, var.$SCALE),
+    $alpha:       _calcAlpha($alpha, $colorName, var.$SCALE),
   );
 };
 

@@ -1,8 +1,16 @@
 $ADJUST: 'adjust';
 $CHANGE: 'change';
+$SCALE: 'scale';
 
-$UNIT-DEG: 'deg';
-$UNIT-PERCENT: '%';
+$UNIT-RGB: 1;
+$UNIT-DEG: 1deg;
+$UNIT-PERCENT: 1%;
+$UNIT-ALPHA: 1;
+
+$RANGE-RGB: 0 255;
+$RANGE-DEG: 0deg 360deg;
+$RANGE-PERCENT: 0% 100%;
+$RANGE-ALPHA: 0 1;
 
 $POSTFIX-HUE: '-h' !default;
 $POSTFIX-SATURATION: '-s' !default;
