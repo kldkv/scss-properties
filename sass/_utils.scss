@@ -37,7 +37,8 @@
 
 @function calcProperty($parameter, $colorName, $colorPart, $unit: 1, $range: 0 1, $type: null) {
   $name: #{$colorName}#{$colorPart};
-  $param: if($parameter and math.is-unitless($parameter), $parameter * $unit, $parameter);
+  $isNumber: meta.type-of($parameter) == 'number';
+  $param: if($isNumber and math.is-unitless($parameter), $parameter * $unit, $parameter);
   $property: mkvar($name);
   $min: list.nth($range, 1);
   $max: list.nth($range, 2);
@@ -61,11 +62,17 @@
   @if ($type == var.$SCALE) {
     // scale existing value relative to its min or max
     @if ($param) {
-      $percentile: math.div($parameter, 100%);
-      $adjust: if($percentile > 0,
-        '#{$max} - #{$property}',
-        '#{$property} - #{$min}');
-      $adjust: '(#{$adjust}) * #{$percentile}';
+      // if $param is greater than 0, use difference from max. if less than 0, use min
+      $adjust: 'max(#{$max} * max(0, #{$param}) / #{$param}, #{$property}) - max(#{$property} * max(0, #{$param}) / #{$param}, #{$min})';
+      $adjust: '(#{$adjust}) * #{$param}';
+      @if ($isNumber) {
+        // simplify css output if $param is a number
+        $percentile: if($isNumber, math.div($param, 100%), $param);
+        $adjust: if($percentile > 0,
+          '#{$max} - #{$property}',
+          '#{$property} - #{$min}');
+        $adjust: '(#{$adjust}) * #{$percentile}';
+      }
       @return mkcalc('#{$property} + (#{$adjust})');
     }
 
