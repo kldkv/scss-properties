@@ -21,6 +21,11 @@
   @return string.unquote('var(#{$property})');
 };
 
+@function postfix($colorName, $colorProp) {
+  $postfix: map.get(var.$PROPERTIES, $colorProp, 'postfix');
+  @return mkvar(#{$colorName}#{$postfix});
+}
+
 ///
 /// Decorator for calc
 ///
@@ -35,13 +40,13 @@
   @return string.unquote('calc(#{$property})');
 };
 
-@function calcProperty($parameter, $colorName, $colorPart, $unit: 1, $range: 0 1, $type: null) {
-  $name: #{$colorName}#{$colorPart};
+@function calcProperty($parameter, $colorName, $colorProp, $type: null) {
+  $property: postfix($colorName, $colorProp);
+  $unit: map.get(var.$PROPERTIES, $colorProp, 'unit');
+  $min: map.get(var.$PROPERTIES, $colorProp, 'min');
+  $max: map.get(var.$PROPERTIES, $colorProp, 'max');
   $isNumber: meta.type-of($parameter) == 'number';
   $param: if($isNumber and math.is-unitless($parameter), $parameter * $unit, $parameter);
-  $property: mkvar($name);
-  $min: list.nth($range, 1);
-  $max: list.nth($range, 2);
 
   @if ($type == var.$ADJUST) {
     // add or subtract parameter from existing value
@@ -82,9 +87,9 @@
   @return null;
 }
 
-@function calcMix($colorName1, $colorName2, $weight, $colorPart, $modify: null) {
-  $var1: meta.type-of($colorName1) == 'string' and mkvar(#{$colorName1}#{$colorPart});
-  $var2: meta.type-of($colorName2) == 'string' and mkvar(#{$colorName2}#{$colorPart});
+@function calcMix($colorName1, $colorName2, $weight, $colorProp, $modify: null) {
+  $var1: meta.type-of($colorName1) == 'string' and postfix($colorName1, $colorProp);
+  $var2: meta.type-of($colorName2) == 'string' and postfix($colorName2, $colorProp);
   $w1: #{$weight};
   $w2: '(1 - #{$weight})';
   @if meta.type-of($weight) == 'number' {

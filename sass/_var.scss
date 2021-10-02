@@ -1,11 +1,12 @@
+@use 'sass:list';
+
 $ADJUST: 'adjust';
 $CHANGE: 'change';
 $SCALE: 'scale';
 
-$UNIT-RGB: 1;
 $UNIT-DEG: 1deg;
 $UNIT-PERCENT: 1%;
-$UNIT-ALPHA: 1;
+$UNIT-NONE: 1;
 
 $RANGE-RGB: 0 255;
 $RANGE-DEG: 0deg 360deg;
@@ -16,3 +17,35 @@ $POSTFIX-HUE: '-h' !default;
 $POSTFIX-SATURATION: '-s' !default;
 $POSTFIX-LIGHTNESS: '-l' !default;
 $POSTFIX-ALPHA: '-a' !default;
+
+$PROPERTIES: (
+  'hue': (
+    'unit': $UNIT-DEG,
+    'min': list.nth($RANGE-DEG, 1),
+    'max': list.nth($RANGE-DEG, 2),
+    'postfix': $POSTFIX-HUE
+  ),
+  'saturation': (
+    'unit': $UNIT-PERCENT,
+    'min': list.nth($RANGE-PERCENT, 1),
+    'max': list.nth($RANGE-PERCENT, 2),
+    'postfix': $POSTFIX-SATURATION
+  ),
+  'lightness': (
+    'unit': $UNIT-PERCENT,
+    'min': list.nth($RANGE-PERCENT, 1),
+    'max': list.nth($RANGE-PERCENT, 2),
+    'postfix': $POSTFIX-LIGHTNESS
+  ),
+  'alpha': (
+    'unit': $UNIT-NONE,
+    'min': list.nth($RANGE-ALPHA, 1),
+    'max': list.nth($RANGE-ALPHA, 2),
+    'postfix': $POSTFIX-ALPHA
+  ),
+  'weight': (
+    'unit': $UNIT-PERCENT,
+    'min': list.nth($RANGE-PERCENT, 1),
+    'max': list.nth($RANGE-PERCENT, 2),
+  ),
+);

@@ -9,49 +9,32 @@
 
 $_colors: ();
 
-@function _compatible($value, $unit: null, $range: null, $type: null) {
+@function _compatible($value, $property, $type: null) {
+  $unit: map.get(var.$PROPERTIES, $property, 'unit');
   $isNumber: meta.type-of($value) == 'number';
   $unitTest: $isNumber and math.is-unitless($value);
-  @if ($isNumber and $unit) {
+  @if ($isNumber and not math.is-unitless($unit)) {
     $unitTest: $unitTest or math.compatible($value, $unit);
   }
-  @if ($isNumber and $range) {
+  @if ($isNumber) {
+    $min: map.get(var.$PROPERTIES, $property, 'min');
+    $max: map.get(var.$PROPERTIES, $property, 'max');
     $allowNegative: $type and $type == var.$ADJUST or $type == var.$SCALE;
     $rangeValue: if($allowNegative, math.abs($value), $value);
-    $unitTest: $unitTest and list.nth($range, 1) < $rangeValue and $rangeValue < list.nth($range, 2);
+    $unitTest: $unitTest and $min < $rangeValue and $rangeValue < $max;
   }
   @return meta.type-of($value) == 'string' or $unitTest;
 }
 
-@function _validate($colors, $hue: (), $saturation: (), $lightness: (), $alpha: (), $weight: (), $type: null) {
+@function _validate($colors, $propValues: (), $type: null) {
   @each $colorName in $colors {
     @if not (meta.type-of($colorName) == 'string' and map.has-key($_colors, $colorName)) {
       @error '#{$colorName} is not a defined color.';
     }
   }
-  @each $h in $hue {
-    @if ($h and not _compatible($h, var.$UNIT-DEG, var.$RANGE-DEG, $type)) {
-      @error 'Invalid hue value: #{$h}';
-    }
-  }
-  @each $s in $saturation {
-    @if ($s and not _compatible($s, var.$UNIT-PERCENT, var.$RANGE-PERCENT, $type)) {
-      @error 'Invalid saturation value: #{$s}';
-    }
-  }
-  @each $l in $lightness {
-    @if ($l and not _compatible($l, var.$UNIT-PERCENT, var.$RANGE-PERCENT, $type)) {
-      @error 'Invalid lightness value: #{$l}';
-    }
-  }
-  @each $a in $alpha {
-    @if ($a and not _compatible($a, $range: var.$RANGE-ALPHA, $type: $type)) {
-      @error 'Invalid alpha value: #{$a}';
-    }
-  }
-  @each $w in $weight {
-    @if ($w and not _compatible($w, 50%, $range: 0% 100%)) {
-      @error 'Invalid weight value: #{$w}';
+  @each $prop, $value in $propValues {
+    @if $value and not _compatible($value, $prop, $type) {
+      @error 'Invalid #{$prop} value: #{$value}';
     }
   }
   @return true;
@@ -63,11 +46,11 @@ $_colors: ();
   }
 
   @if map.get($_colors, $colorName, 'alpha') {
-    @return utils.calcProperty($alpha, $colorName, var.$POSTFIX-ALPHA, var.$UNIT-ALPHA, var.$RANGE-ALPHA, $type);
+    @return utils.calcProperty($alpha, $colorName, 'alpha', $type);
   } @else {
     $newAlpha: $alpha;
-    $min: list.nth(var.$RANGE-ALPHA, 1);
-    $max: list.nth(var.$RANGE-ALPHA, 2);
+    $min: map.get(var.$PROPERTIES, 'alpha', 'min');
+    $max: map.get(var.$PROPERTIES, 'alpha', 'max');
 
     @if (type == var.$ADJUST) {
       $newAlpha: 1 + $alpha;
@@ -84,57 +67,61 @@ $_colors: ();
 @function _mixAlpha($colorName1, $colorName2, $weight) {
   $hasAlpha1: map.get($_colors, $colorName1, 'alpha');
   $hasAlpha2: map.get($_colors, $colorName2, 'alpha');
-  $var1: if($hasAlpha1, $colorName1, list.nth(var.$RANGE-ALPHA, 2));
-  $var2: if($hasAlpha2, $colorName2, list.nth(var.$RANGE-ALPHA, 2));
+  $max: map.get(var.$PROPERTIES, 'alpha', 'max');
+  $var1: if($hasAlpha1, $colorName1, $max);
+  $var2: if($hasAlpha2, $colorName2, $max);
 
   @if not $hasAlpha1 and not $hasAlpha2 {
     @return null;
   }
-  @return utils.calcMix($var1, $var2, $weight, var.$POSTFIX-ALPHA)
+  @return utils.calcMix($var1, $var2, $weight, 'alpha')
+}
+
+@function _invertHue($colorName1, $colorName2) {
+  $color1: map.get($_colors, $colorName1, 'color');
+  $color2: map.get($_colors, $colorName2, 'color');
+  @return math.abs(color.hue($color1) - color.hue($color2)) > 180deg;
 }
 
 // also allow mixing different values by different weights?
 @function mix($colorName1, $colorName2, $weight: 50%, $hue: null, $saturation: null, $lightness: null, $alpha: null, $invert-hue: null) {
-  $valid: _validate($colors: ($colorName1, $colorName2), $weight: ($weight, $hue, $saturation, $lightness, $alpha));
-  $color1: map.get($_colors, $colorName1, 'color');
-  $color2: map.get($_colors, $colorName2, 'color');
-  $invert: math.abs(color.hue($color1) - color.hue($color2)) > 180deg;
+  $valid: _validate(($colorName1, $colorName2), ('weight' $weight, 'weight' $hue, 'weight' $saturation, 'weight' $lightness, 'weight' $alpha));
+  $invert: _invertHue($colorName1, $colorName2);
   $invert: if($invert-hue, not $invert, $invert);
-
   @return sass-color.makeHSL(
-    $hue:         utils.calcMix($colorName1, $colorName2, $hue or $weight, var.$POSTFIX-HUE, $modify: $invert and -360deg),
-    $saturation:  utils.calcMix($colorName1, $colorName2, $saturation or $weight, var.$POSTFIX-SATURATION),
-    $lightness:   utils.calcMix($colorName1, $colorName2, $lightness or $weight, var.$POSTFIX-LIGHTNESS),
+    $hue:         utils.calcMix($colorName1, $colorName2, $hue or $weight, 'hue', $modify: $invert and -360deg),
+    $saturation:  utils.calcMix($colorName1, $colorName2, $saturation or $weight, 'saturation'),
+    $lightness:   utils.calcMix($colorName1, $colorName2, $lightness or $weight, 'lightness'),
     $alpha:       _mixAlpha($colorName1, $colorName2, $alpha or $weight),
   );
 }
 
 @function adjust($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
-  $valid: _validate($colorName, $hue: $hue, $saturation: $saturation, $lightness: $lightness, $alpha: $alpha, $type: var.$ADJUST);
+  $valid: _validate($colorName, ('hue': $hue, 'saturation': $saturation, 'lightness': $lightness, 'alpha': $alpha), $type: var.$ADJUST);
   @return sass-color.makeHSL(
-    $hue:         utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$RANGE-DEG, var.$ADJUST),
-    $saturation:  utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$RANGE-PERCENT, var.$ADJUST),
-    $lightness:   utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$RANGE-PERCENT, var.$ADJUST),
+    $hue:         utils.calcProperty($hue, $colorName, 'hue', var.$ADJUST),
+    $saturation:  utils.calcProperty($saturation, $colorName, 'saturation', var.$ADJUST),
+    $lightness:   utils.calcProperty($lightness, $colorName, 'lightness', var.$ADJUST),
     $alpha:       _calcAlpha($alpha, $colorName, var.$ADJUST),
   );
 }
 
 @function change($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
-  $valid: _validate($colorName, $hue: $hue, $saturation: $saturation, $lightness: $lightness, $alpha: $alpha, $type: var.$CHANGE);
+  $valid: _validate($colorName, ('hue': $hue, 'saturation': $saturation, 'lightness': $lightness, 'alpha': $alpha), $type: var.$CHANGE);
   @return sass-color.makeHSL(
-    $hue:         utils.calcProperty($hue, $colorName, var.$POSTFIX-HUE, var.$UNIT-DEG, var.$RANGE-DEG, var.$CHANGE),
-    $saturation:  utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$RANGE-PERCENT, var.$CHANGE),
-    $lightness:   utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$RANGE-PERCENT, var.$CHANGE),
+    $hue:         utils.calcProperty($hue, $colorName, 'hue', var.$CHANGE),
+    $saturation:  utils.calcProperty($saturation, $colorName, 'saturation', var.$CHANGE),
+    $lightness:   utils.calcProperty($lightness, $colorName, 'lightness', var.$CHANGE),
     $alpha:       _calcAlpha($alpha, $colorName, var.$CHANGE),
   );
 };
 
 @function scale($colorName, $saturation: null, $lightness: null, $alpha: null) {
-  $valid: _validate($colorName, $saturation: $saturation, $lightness: $lightness, $alpha: $alpha, $type: var.$SCALE);
+  $valid: _validate($colorName, ('saturation': $saturation, 'lightness': $lightness, 'alpha': $alpha), $type: var.$SCALE);
   @return sass-color.makeHSL(
-    $hue:         utils.mkvar(#{$colorName}#{var.$POSTFIX-HUE}),
-    $saturation:  utils.calcProperty($saturation, $colorName, var.$POSTFIX-SATURATION, var.$UNIT-PERCENT, var.$RANGE-PERCENT, var.$SCALE),
-    $lightness:   utils.calcProperty($lightness, $colorName, var.$POSTFIX-LIGHTNESS, var.$UNIT-PERCENT, var.$RANGE-PERCENT, var.$SCALE),
+    $hue:         utils.postfix($colorName, 'hue'),
+    $saturation:  utils.calcProperty($saturation, $colorName, 'saturation', var.$SCALE),
+    $lightness:   utils.calcProperty($lightness, $colorName, 'lightness', var.$SCALE),
     $alpha:       _calcAlpha($alpha, $colorName, var.$SCALE),
   );
 };
