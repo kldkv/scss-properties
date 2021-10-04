@@ -34,7 +34,7 @@ $_colors: ();
   }
   @each $prop, $value in $propValues {
     @if $value and not _compatible($value, $prop, $type) {
-      @error 'Invalid #{$prop} value: #{$value}';
+      @error 'Invalid #{$prop} value for #{$type} function: #{$value}';
     }
   }
   @return true;
@@ -85,7 +85,7 @@ $_colors: ();
 
 // also allow mixing different values by different weights?
 @function mix($colorName1, $colorName2, $weight: 50%, $hue: null, $saturation: null, $lightness: null, $alpha: null, $invert-hue: null) {
-  $valid: _validate(($colorName1, $colorName2), ('weight' $weight, 'weight' $hue, 'weight' $saturation, 'weight' $lightness, 'weight' $alpha));
+  $valid: _validate(($colorName1, $colorName2), ('weight' $weight, 'weight' $hue, 'weight' $saturation, 'weight' $lightness, 'weight' $alpha), $type: 'mix');
   $invert: _invertHue($colorName1, $colorName2);
   $invert: if($invert-hue, not $invert, $invert);
   @return sass-color.makeHSL(
