@@ -126,6 +126,80 @@ $_colors: ();
   );
 };
 
+$_functionTypes: var.$ADJUST, var.$CHANGE, var.$SCALE, 'mix';
+@function _parseSetArg($arg) {
+  $property: map.has-key(var.$PROPERTIES, $arg) and $arg;
+  $func: list.index($_functionTypes, $arg) and $arg;
+  @if not $property and not $func {
+    @error 'Bad argument for set function: #{$arg}';
+  }
+  @return $property, $func;
+}
+
+// could simplify if I changed the previous function outputs and used meta.call
+@function _getOperation($colorName, $property: null, $type: null, $settings: null) {
+  @if not $property {
+    @error 'Must specify color property: #{$property} #{$type} #{$settings}';
+  }
+  @if not $type {
+    @error 'Must specify modification type: #{$property} #{$type} #{$settings}';
+  }
+  @if $type == 'mix' {
+    $colorName2: list.nth($settings, 1); // allow map as well
+    $weight: list.nth($settings, 2) or 50%;
+    $valid: _validate(($colorName, $colorName2), ('weight': $weight), $type: 'mix');
+    @if $property == 'alpha' {
+      @return _mixAlpha($colorName, $colorName2, $weight);
+    } @else {
+      $invert: $property == 'hue' and _invertHue($colorName, $colorName2);
+      // invert option
+      @return utils.calcMix($colorName, $colorName2, $weight, $property, $modify: $invert and -360deg);
+    }
+  } @else {
+    $param: list.nth($settings, 1);
+    $valid: _validate($colorName, (#{$property}: $param), $type);
+    @if $property == 'alpha' {
+      @return _calcAlpha($param, $colorName, $type);
+    } @else {
+      @return utils.calcProperty($param, $colorName, $property, $type);
+    }
+  }
+}
+
+@function set( $colorName, $setMap: null, $argList...) {
+  @if not $setMap {
+    @return set($colorName, meta.keywords($argList));
+  }
+
+  $ops: ();
+  @each $key1, $value in $setMap {
+    $arg1: _parseSetArg($key1);
+    @if meta.type-of($value) == 'list' and meta.type-of(list.nth($value, 1) != 'list') {
+      $settings: ();
+      @for $i from 2 through list.length($value) {
+        $settings: list.append($settings, list.nth($value, $i));
+      }
+      $value: (#{list.nth($value, 1)}: $settings);
+    }
+    // @if meta.type-of($value) == 'map' {
+    //   $value: list.zip(map.keys($value), map.values($value));
+    // }
+    @each $key2, $settings in $value {
+      $arg2: _parseSetArg($key2);
+      $property: list.nth($arg1, 1) or list.nth($arg2, 1);
+      $type: list.nth($arg1, 2) or list.nth($arg2, 2);
+      $ops: map.set($ops, $property, _getOperation($colorName, $property, $type, $settings));
+    }
+  }
+
+  @return sass-color.makeHSL(
+    $hue:         map.get($ops, 'hue') or utils.postfix($colorName, 'hue'),
+    $saturation:  map.get($ops, 'saturation') or utils.postfix($colorName, 'saturation'),
+    $lightness:   map.get($ops, 'lightness') or utils.postfix($colorName, 'lightness'),
+    $alpha:       map.get($ops, 'alpha') or map.get($_colors, $colorName, 'alpha') and utils.postfix($colorName, 'alpha'),
+  );
+}
+
 @mixin define($colorMap, $parent: '', $forceAlpha: true) {
   @if (meta.type-of($colorMap) == 'map') {
     @each $colorName in map.keys($colorMap) {
