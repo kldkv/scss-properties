@@ -7,8 +7,6 @@
 @use 'utils';
 @use 'color' as sass-color;
 
-$_colors: ();
-
 @function _compatible($value, $property, $type: null) {
   $unit: map.get(var.$PROPERTIES, $property, 'unit');
   $isNumber: meta.type-of($value) == 'number';
@@ -28,7 +26,7 @@ $_colors: ();
 
 @function _validate($colors, $propValues: (), $type: null) {
   @each $colorName in $colors {
-    @if not (meta.type-of($colorName) == 'string' and map.has-key($_colors, $colorName)) {
+    @if not (meta.type-of($colorName) == 'string' and map.has-key(var.$COLORS, $colorName)) {
       @error '#{$colorName} is not a defined color.';
     }
   }
@@ -45,7 +43,7 @@ $_colors: ();
     @return null;
   }
 
-  @if map.get($_colors, $colorName, 'alpha') {
+  @if map.get(var.$COLORS, $colorName, 'alpha') {
     @return utils.calcProperty($alpha, $colorName, 'alpha', $type);
   } @else {
     $newAlpha: $alpha;
@@ -65,8 +63,8 @@ $_colors: ();
 }
 
 @function _mixAlpha($colorName1, $colorName2, $weight) {
-  $hasAlpha1: map.get($_colors, $colorName1, 'alpha');
-  $hasAlpha2: map.get($_colors, $colorName2, 'alpha');
+  $hasAlpha1: map.get(var.$COLORS, $colorName1, 'alpha');
+  $hasAlpha2: map.get(var.$COLORS, $colorName2, 'alpha');
   $max: map.get(var.$PROPERTIES, 'alpha', 'max');
   $var1: if($hasAlpha1, $colorName1, $max);
   $var2: if($hasAlpha2, $colorName2, $max);
@@ -78,8 +76,8 @@ $_colors: ();
 }
 
 @function _invertHue($colorName1, $colorName2) {
-  $color1: map.get($_colors, $colorName1, 'color');
-  $color2: map.get($_colors, $colorName2, 'color');
+  $color1: map.get(var.$COLORS, $colorName1, 'color');
+  $color2: map.get(var.$COLORS, $colorName2, 'color');
   @return math.abs(color.hue($color1) - color.hue($color2)) > 180deg;
 }
 
@@ -196,7 +194,7 @@ $_functionTypes: var.$ADJUST, var.$CHANGE, var.$SCALE, 'mix';
     $hue:         map.get($ops, 'hue') or utils.postfix($colorName, 'hue'),
     $saturation:  map.get($ops, 'saturation') or utils.postfix($colorName, 'saturation'),
     $lightness:   map.get($ops, 'lightness') or utils.postfix($colorName, 'lightness'),
-    $alpha:       map.get($ops, 'alpha') or map.get($_colors, $colorName, 'alpha') and utils.postfix($colorName, 'alpha'),
+    $alpha:       map.get($ops, 'alpha') or map.get(var.$COLORS, $colorName, 'alpha') and utils.postfix($colorName, 'alpha'),
   );
 }
 
@@ -237,10 +235,10 @@ $_functionTypes: var.$ADJUST, var.$CHANGE, var.$SCALE, 'mix';
           #{$name-a}: color.alpha($color);
         }
 
-        $_colors: map.merge($_colors, (#{$name}: (
+        var.$COLORS: map.set(var.$COLORS, $name, (
           'color': $color,
           'alpha': $isAlpha
-        ))) !global;
+        ));
       } @else {
         #{$name}: $color;
       }
