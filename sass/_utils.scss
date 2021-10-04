@@ -45,8 +45,22 @@
   $unit: map.get(var.$PROPERTIES, $colorProp, 'unit');
   $min: map.get(var.$PROPERTIES, $colorProp, 'min');
   $max: map.get(var.$PROPERTIES, $colorProp, 'max');
-  $isNumber: meta.type-of($parameter) == 'number';
-  $param: if($isNumber and math.is-unitless($parameter), $parameter * $unit, $parameter);
+
+  $paramIsNumber: meta.type-of($parameter) == 'number';
+  $param: if($paramIsNumber and math.is-unitless($parameter), $parameter * $unit, $parameter);
+
+  @if $colorProp == 'alpha' and not map.get(var.$COLORS, $colorName, 'alpha') {
+    // if targeting alpha for a color without an alpha value / variable
+    $alpha: null;
+    @if ($type == var.$ADJUST) {
+      $alpha: 1 + $param;
+    } @else if ($type == var.$CHANGE) {
+      $alpha: $param;
+    } @else if ($type == var.$SCALE) {
+      $alpha: 1 + math.div($param, 100%);
+    }
+    @return math.clamp($min, $alpha, $max);
+  }
 
   @if ($type == var.$ADJUST) {
     // add or subtract parameter from existing value
@@ -70,9 +84,9 @@
       // if $param is greater than 0, use difference from max. if less than 0, use min
       $adjust: 'max(#{$max} * max(0, #{$param}) / #{$param}, #{$property}) - max(#{$property} * max(0, #{$param}) / #{$param}, #{$min})';
       $adjust: '(#{$adjust}) * #{$param}';
-      @if ($isNumber) {
+      @if ($paramIsNumber) {
         // simplify css output if $param is a number
-        $percentile: if($isNumber, math.div($param, 100%), $param);
+        $percentile: if($paramIsNumber, math.div($param, 100%), $param);
         $adjust: if($percentile > 0,
           '#{$max} - #{$property}',
           '#{$property} - #{$min}');

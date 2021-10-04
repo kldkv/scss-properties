@@ -38,30 +38,6 @@
   @return true;
 }
 
-@function _calcAlpha($alpha, $colorName, $type) {
-  @if not $alpha or $alpha == 1 {
-    @return null;
-  }
-
-  @if map.get(var.$COLORS, $colorName, 'alpha') {
-    @return utils.calcProperty($alpha, $colorName, 'alpha', $type);
-  } @else {
-    $newAlpha: $alpha;
-    $min: map.get(var.$PROPERTIES, 'alpha', 'min');
-    $max: map.get(var.$PROPERTIES, 'alpha', 'max');
-
-    @if (type == var.$ADJUST) {
-      $newAlpha: 1 + $alpha;
-    } @else if ($type == var.$CHANGE) {
-      $newAlpha: $alpha;
-    } @else if ($type == var.$SCALE) {
-      $newAlpha: 1 + math.div($alpha / 100%);
-    }
-
-    @return math.clamp($min, $newAlpha, $max);
-  }
-}
-
 @function _mixAlpha($colorName1, $colorName2, $weight) {
   $hasAlpha1: map.get(var.$COLORS, $colorName1, 'alpha');
   $hasAlpha2: map.get(var.$COLORS, $colorName2, 'alpha');
@@ -100,7 +76,7 @@
     $hue:         utils.calcProperty($hue, $colorName, 'hue', var.$ADJUST),
     $saturation:  utils.calcProperty($saturation, $colorName, 'saturation', var.$ADJUST),
     $lightness:   utils.calcProperty($lightness, $colorName, 'lightness', var.$ADJUST),
-    $alpha:       _calcAlpha($alpha, $colorName, var.$ADJUST),
+    $alpha:       utils.calcProperty($alpha, $colorName, 'alpha', var.$ADJUST),
   );
 }
 
@@ -110,17 +86,18 @@
     $hue:         utils.calcProperty($hue, $colorName, 'hue', var.$CHANGE),
     $saturation:  utils.calcProperty($saturation, $colorName, 'saturation', var.$CHANGE),
     $lightness:   utils.calcProperty($lightness, $colorName, 'lightness', var.$CHANGE),
-    $alpha:       _calcAlpha($alpha, $colorName, var.$CHANGE),
+    $alpha:       utils.calcProperty($alpha, $colorName, 'alpha', var.$CHANGE),
   );
 };
 
+// consider using arbitrary arg keywords with meta.keywords func
 @function scale($colorName, $saturation: null, $lightness: null, $alpha: null) {
   $valid: _validate($colorName, ('saturation': $saturation, 'lightness': $lightness, 'alpha': $alpha), $type: var.$SCALE);
   @return sass-color.makeHSL(
     $hue:         utils.postfix($colorName, 'hue'),
     $saturation:  utils.calcProperty($saturation, $colorName, 'saturation', var.$SCALE),
     $lightness:   utils.calcProperty($lightness, $colorName, 'lightness', var.$SCALE),
-    $alpha:       _calcAlpha($alpha, $colorName, var.$SCALE),
+    $alpha:       utils.calcProperty($alpha, $colorName, 'alpha', var.$SCALE),
   );
 };
 
@@ -156,15 +133,11 @@ $_functionTypes: var.$ADJUST, var.$CHANGE, var.$SCALE, 'mix';
   } @else {
     $param: list.nth($settings, 1);
     $valid: _validate($colorName, (#{$property}: $param), $type);
-    @if $property == 'alpha' {
-      @return _calcAlpha($param, $colorName, $type);
-    } @else {
-      @return utils.calcProperty($param, $colorName, $property, $type);
-    }
+    @return utils.calcProperty($param, $colorName, $property, $type);
   }
 }
 
-@function set( $colorName, $setMap: null, $argList...) {
+@function set($colorName, $setMap: null, $argList...) {
   @if not $setMap {
     @return set($colorName, meta.keywords($argList));
   }
