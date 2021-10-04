@@ -38,19 +38,6 @@
   @return true;
 }
 
-@function _mixAlpha($colorName1, $colorName2, $weight) {
-  $hasAlpha1: map.get(var.$COLORS, $colorName1, 'alpha');
-  $hasAlpha2: map.get(var.$COLORS, $colorName2, 'alpha');
-  $max: map.get(var.$PROPERTIES, 'alpha', 'max');
-  $var1: if($hasAlpha1, $colorName1, $max);
-  $var2: if($hasAlpha2, $colorName2, $max);
-
-  @if not $hasAlpha1 and not $hasAlpha2 {
-    @return null;
-  }
-  @return utils.calcMix($var1, $var2, $weight, 'alpha')
-}
-
 @function _invertHue($colorName1, $colorName2) {
   $color1: map.get(var.$COLORS, $colorName1, 'color');
   $color2: map.get(var.$COLORS, $colorName2, 'color');
@@ -66,7 +53,7 @@
     $hue:         utils.calcMix($colorName1, $colorName2, $hue or $weight, 'hue', $modify: $invert and -360deg),
     $saturation:  utils.calcMix($colorName1, $colorName2, $saturation or $weight, 'saturation'),
     $lightness:   utils.calcMix($colorName1, $colorName2, $lightness or $weight, 'lightness'),
-    $alpha:       _mixAlpha($colorName1, $colorName2, $alpha or $weight),
+    $alpha:       utils.calcMix($colorName1, $colorName2, $alpha or $weight, 'alpha'),
   );
 }
 
@@ -123,13 +110,9 @@ $_functionTypes: var.$ADJUST, var.$CHANGE, var.$SCALE, 'mix';
     $colorName2: list.nth($settings, 1); // allow map as well
     $weight: list.nth($settings, 2) or 50%;
     $valid: _validate(($colorName, $colorName2), ('weight': $weight), $type: 'mix');
-    @if $property == 'alpha' {
-      @return _mixAlpha($colorName, $colorName2, $weight);
-    } @else {
-      $invert: $property == 'hue' and _invertHue($colorName, $colorName2);
-      // invert option
-      @return utils.calcMix($colorName, $colorName2, $weight, $property, $modify: $invert and -360deg);
-    }
+    $invert: $property == 'hue' and _invertHue($colorName, $colorName2);
+    // invert option
+    @return utils.calcMix($colorName, $colorName2, $weight, $property, $modify: $invert and -360deg);
   } @else {
     $param: list.nth($settings, 1);
     $valid: _validate($colorName, (#{$property}: $param), $type);

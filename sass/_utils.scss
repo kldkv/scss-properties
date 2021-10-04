@@ -102,8 +102,18 @@
 }
 
 @function calcMix($colorName1, $colorName2, $weight, $colorProp, $modify: null) {
-  $var1: meta.type-of($colorName1) == 'string' and postfix($colorName1, $colorProp);
-  $var2: meta.type-of($colorName2) == 'string' and postfix($colorName2, $colorProp);
+  $var1: postfix($colorName1, $colorProp);
+  $var2: postfix($colorName2, $colorProp);
+  @if $colorProp == 'alpha' {
+    $hasAlpha1: map.get(var.$COLORS, $colorName1, 'alpha');
+    $hasAlpha2: map.get(var.$COLORS, $colorName2, 'alpha');
+    @if not $hasAlpha1 and not $hasAlpha2 {
+      @return null;
+    }
+    $var1: if($hasAlpha1, $var1, 1);
+    $var2: if($hasAlpha2, $var2, 1);
+  }
+
   $w1: #{$weight};
   $w2: '(1 - #{$weight})';
   @if meta.type-of($weight) == 'number' {
@@ -119,8 +129,8 @@
     }
   }
 
-  $expr1: if(meta.type-of($colorName1) == 'number' and meta.type-of($w1) == 'number', $colorName1 * $w1, '(#{$var1} * #{$w1})');
-  $expr2: if(meta.type-of($colorName2) == 'number' and meta.type-of($w2) == 'number', $colorName2 * $w2, '(#{$var2} * #{$w2})');
+  $expr1: if(meta.type-of($var1) == 'number' and meta.type-of($w1) == 'number', $var1 * $w1, '(#{$var1} * #{$w1})');
+  $expr2: if(meta.type-of($var2) == 'number' and meta.type-of($w2) == 'number', $var2 * $w2, '(#{$var2} * #{$w2})');
   @return mkcalc('#{$expr1} + #{$expr2}');
 }
 
