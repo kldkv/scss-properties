@@ -6,39 +6,12 @@
 @use 'sass:string';
 @use 'var';
 
-///
-/// Decorator for css property var
-///
-/// @example
-/// // returns var(--brand-color)
-/// mkvar(--brand-color);
-///
-/// @param {Any} $property - Initial value
-/// @return {String} - wrapper value with 'var'
-///
-
-@function mkvar($property) {
-  @return string.unquote('var(#{$property})');
-};
-
 @function postfix($colorName, $colorProp) {
   $postfix: map.get(var.$PROPERTIES, $colorProp, 'postfix');
-  @return mkvar(#{$colorName}#{$postfix});
+  $varName: #{$colorName}#{$postfix};
+  @return var($varName);
 }
 
-///
-/// Decorator for calc
-///
-/// @example
-/// // returns calc(var(--brand-color) + 20)
-/// mkcalc('var(--brand-color) + 20');
-///
-/// @param {Any} $property - Initial value
-/// @return {String} - wrapper value with 'calc'
-///
-@function mkcalc($property) {
-  @return string.unquote('calc(#{$property})');
-};
 
 @function calcProperty($parameter, $colorName, $colorProp, $type: null) {
   $property: postfix($colorName, $colorProp);
@@ -63,7 +36,7 @@
     @if $propIsNumber and $paramIsNumber {
       @return math.clamp($min, $property + $param, $max);
     } @else if ($param) {
-      @return mkcalc('#{$property} + #{$param}');
+      @return calc(#{$property} + #{$param});
     }
     @return $property;
   }
@@ -92,7 +65,7 @@
           '#{$property} - #{$min}');
         $adjust: '(#{$adjust}) * #{$percentile}';
       }
-      @return mkcalc('#{$property} + (#{$adjust})');
+      @return calc(#{$property} + (#{$adjust}));
     }
 
     @return $property;
@@ -131,7 +104,7 @@
 
   $expr1: if(meta.type-of($var1) == 'number' and meta.type-of($w1) == 'number', $var1 * $w1, '(#{$var1} * #{$w1})');
   $expr2: if(meta.type-of($var2) == 'number' and meta.type-of($w2) == 'number', $var2 * $w2, '(#{$var2} * #{$w2})');
-  @return mkcalc('#{$expr1} + #{$expr2}');
+  @return calc(#{$expr1} + #{$expr2});
 }
 
 ///
