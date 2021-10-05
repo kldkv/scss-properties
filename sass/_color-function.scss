@@ -57,35 +57,35 @@
   );
 }
 
+@function _calcProperties($colorName, $function, $args...) {
+  $kwargs: meta.keywords($args);
+  $valid: _validate($colorName, $kwargs, $function);
+  $ops: ();
+  @each $property, $value in $kwargs {
+    @if $value {
+      $ops: map.set($ops, $property, utils.calcProperty($value, $colorName, $property, $function));
+    }
+  }
+  @return $ops;
+}
+
+@function _calcHSL($colorName, $function, $args...) {
+  $properties: _calcProperties($colorName, $function, $args...);
+  $defaults: sass-color.defaults($colorName);
+  $properties: map.merge($defaults, $properties);
+  @return sass-color.makeHSL($properties...);
+}
+
 @function adjust($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
-  $valid: _validate($colorName, ('hue': $hue, 'saturation': $saturation, 'lightness': $lightness, 'alpha': $alpha), $type: var.$ADJUST);
-  @return sass-color.makeHSL(
-    $hue:         utils.calcProperty($hue, $colorName, 'hue', var.$ADJUST),
-    $saturation:  utils.calcProperty($saturation, $colorName, 'saturation', var.$ADJUST),
-    $lightness:   utils.calcProperty($lightness, $colorName, 'lightness', var.$ADJUST),
-    $alpha:       utils.calcProperty($alpha, $colorName, 'alpha', var.$ADJUST),
-  );
+  @return _calcHSL($colorName, var.$ADJUST, $hue: $hue, $saturation: $saturation, $lightness: $lightness, $alpha: $alpha);
 }
 
 @function change($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
-  $valid: _validate($colorName, ('hue': $hue, 'saturation': $saturation, 'lightness': $lightness, 'alpha': $alpha), $type: var.$CHANGE);
-  @return sass-color.makeHSL(
-    $hue:         utils.calcProperty($hue, $colorName, 'hue', var.$CHANGE),
-    $saturation:  utils.calcProperty($saturation, $colorName, 'saturation', var.$CHANGE),
-    $lightness:   utils.calcProperty($lightness, $colorName, 'lightness', var.$CHANGE),
-    $alpha:       utils.calcProperty($alpha, $colorName, 'alpha', var.$CHANGE),
-  );
+  @return _calcHSL($colorName, var.$CHANGE, $hue: $hue, $saturation: $saturation, $lightness: $lightness, $alpha: $alpha);
 };
 
-// consider using arbitrary arg keywords with meta.keywords func
 @function scale($colorName, $saturation: null, $lightness: null, $alpha: null) {
-  $valid: _validate($colorName, ('saturation': $saturation, 'lightness': $lightness, 'alpha': $alpha), $type: var.$SCALE);
-  @return sass-color.makeHSL(
-    $hue:         utils.postfix($colorName, 'hue'),
-    $saturation:  utils.calcProperty($saturation, $colorName, 'saturation', var.$SCALE),
-    $lightness:   utils.calcProperty($lightness, $colorName, 'lightness', var.$SCALE),
-    $alpha:       utils.calcProperty($alpha, $colorName, 'alpha', var.$SCALE),
-  );
+  @return _calcHSL($colorName, var.$SCALE, $saturation: $saturation, $lightness: $lightness, $alpha: $alpha);
 };
 
 $_functionTypes: var.$ADJUST, var.$CHANGE, var.$SCALE, 'mix';
@@ -146,12 +146,9 @@ $_functionTypes: var.$ADJUST, var.$CHANGE, var.$SCALE, 'mix';
     }
   }
 
-  @return sass-color.makeHSL(
-    $hue:         map.get($ops, 'hue') or utils.postfix($colorName, 'hue'),
-    $saturation:  map.get($ops, 'saturation') or utils.postfix($colorName, 'saturation'),
-    $lightness:   map.get($ops, 'lightness') or utils.postfix($colorName, 'lightness'),
-    $alpha:       map.get($ops, 'alpha') or map.get(var.$COLORS, $colorName, 'alpha') and utils.postfix($colorName, 'alpha'),
-  );
+  $defaults: sass-color.defaults($colorName);
+  $properties: map.merge($defaults, $ops);
+  @return sass-color.makeHSL($properties...);
 }
 
 @mixin define($colorMap, $parent: '', $forceAlpha: true) {

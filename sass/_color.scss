@@ -1,4 +1,20 @@
+@use 'sass:list';
+@use 'sass:map';
 @use 'sass:string';
+@use 'var';
+@use 'utils';
+
+@function defaults($colorName) {
+  $properties: 'hue' 'saturation' 'lightness';
+  @if map.get(var.$COLORS, $colorName, 'alpha') {
+    $properties: list.append($properties, 'alpha');
+  }
+  $ops: ();
+  @each $prop in $properties {
+    $ops: map.set($ops, $prop, utils.postfix($colorName, $prop));
+  }
+  @return $ops;
+}
 
 @function makeHSL($hue: null, $saturation: null, $lightness: null, $alpha: null) {
   @if ($alpha) {
