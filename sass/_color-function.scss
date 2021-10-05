@@ -71,7 +71,7 @@
 
 @function _calcHSL($colorName, $function, $args...) {
   $properties: _calcProperties($colorName, $function, $args...);
-  $defaults: sass-color.defaults($colorName);
+  $defaults: map.get(var.$COLORS, $colorName, 'defaults');
   $properties: map.merge($defaults, $properties);
   @return sass-color.makeHSL($properties...);
 }
@@ -145,7 +145,7 @@
     }
   }
 
-  $defaults: sass-color.defaults($colorName);
+  $defaults: map.get(var.$COLORS, $colorName, 'defaults');
   $properties: map.merge($defaults, $ops);
   @return sass-color.makeHSL($properties...);
 }
@@ -173,23 +173,27 @@
         $name-l: #{$name}#{var.$POSTFIX-LIGHTNESS};
         $name-a: #{$name}#{var.$POSTFIX-ALPHA};
   
+        $defaults: (
+          #{var.$HUE}: var($name-h),
+          #{var.$SATURATION}: var($name-s),
+          #{var.$LIGHTNESS}: var($name-l)
+        );
         @if ($isAlpha) {
-          #{$name}: sass-color.makeHSL(var($name-h), var($name-s), var($name-l), var($name-a));
-        } @else {
-          #{$name}: sass-color.makeHSL(var($name-h), var($name-s), var($name-l));
+          $defaults: map.set($defaults, var.$ALPHA, var($name-a));
         }
   
+        #{$name}: sass-color.makeHSL($defaults...);
         #{$name-h}: color.hue($color);
         #{$name-s}: color.saturation($color);
         #{$name-l}: color.lightness($color);
-  
         @if ($isAlpha) {
           #{$name-a}: color.alpha($color);
         }
 
         var.$COLORS: map.set(var.$COLORS, $name, (
           'color': $color,
-          'alpha': $isAlpha
+          'alpha': $isAlpha,
+          'defaults': $defaults
         ));
       } @else {
         #{$name}: $color;
