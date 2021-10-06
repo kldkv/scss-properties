@@ -1,0 +1,173 @@
+@use '../node_modules/sass-true/sass/true' as *;
+
+@use 'sass:color';
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:string';
+@use '../sass/var' with (
+  $POSTFIX-HUE: '-h',
+  $POSTFIX-SATURATION: '-s',
+  $POSTFIX-LIGHTNESS: '-l',
+  $POSTFIX-ALPHA: '-a',
+);
+@use '../sass/color-function' as color-prop;
+@use '../sass/utils';
+
+@include describe('User functions') {
+  @include describe('define') {
+
+    @include it('defines hsla properties using hsl values') {
+      @include assert {
+        @include output {
+          @include color-prop.define((
+          --color: hsl(131deg, 53%, 91%)
+          ));
+        }
+        @include expect {
+          --color: hsla(var(--color-h), var(--color-s), var(--color-l), var(--color-a));
+          --color-h: 131deg;
+          --color-s: 53%;
+          --color-l: 91%;
+          --color-a: 1;
+        }
+      }
+    }
+
+    @include it('defines hsla properties using hex values') {
+      @include assert {
+        @include output {
+          @include color-prop.define((
+          --color: #bf89c2
+          ));
+        }
+        @include expect {
+          --color: hsla(var(--color-h), var(--color-s), var(--color-l), var(--color-a));
+          --color-h: 296.8421052632deg;
+          --color-s: 31.843575419%;
+          --color-l: 64.9019607843%;
+          --color-a: 1;
+        }
+      }
+    }
+    @include it('defines hsla properties using hsla values') {
+      @include assert {
+        @include output {
+          @include color-prop.define((
+          --color: hsla(211deg, 96%, 28%, 0.71)
+          ));
+        }
+        @include expect {
+          --color: hsla(var(--color-h), var(--color-s), var(--color-l), var(--color-a));
+          --color-h: 211deg;
+          --color-s: 96%;
+          --color-l: 28%;
+          --color-a: 0.71;
+        }
+      }
+    }
+    @include it('defines hsla properties using hex values') {
+      @include assert {
+        @include output {
+          @include color-prop.define((
+          --color: #22242b9e
+          ));
+        }
+        @include expect {
+          --color: hsla(var(--color-h), var(--color-s), var(--color-l), var(--color-a));
+          --color-h: 226.6666666667deg;
+          --color-s: 11.6883116883%;
+          --color-l: 15.0980392157%;
+          --color-a: 0.6196078431;
+        }
+      }
+    }
+
+    @include it('defines hsl properties using hsl with $forceAlpha') {
+      @include assert {
+        @include output {
+          @include color-prop.define((
+          --color: hsl(150deg, 93%, 17%)
+          ), $forceAlpha: false);
+        }
+        @include expect {
+          --color: hsl(var(--color-h), var(--color-s), var(--color-l));
+          --color-h: 150deg;
+          --color-s: 93%;
+          --color-l: 17%;
+        }
+      }
+    }
+
+    @include it('defines hsl properties using hex with $forceAlpha') {
+      @include assert {
+        @include output {
+          @include color-prop.define((
+          --color: #cb2541
+          ), $forceAlpha: false);
+        }
+        @include expect {
+          --color: hsl(var(--color-h), var(--color-s), var(--color-l));
+          --color-h: 349.8795180723deg;
+          --color-s: 69.1666666667%;
+          --color-l: 47.0588235294%;
+        }
+      }
+    }
+    @include it('defines multiple colors') {
+      @include assert {
+        @include output {
+          @include color-prop.define((
+          --light: #da0,
+          --dark: rgba(#040, 0.5),
+          --brand: #e7d20d
+          ), $forceAlpha: false);
+        }
+        @include expect {
+          --light: hsl(var(--light-h), var(--light-s), var(--light-l));
+          --light-h: 46.1538461538deg;
+          --light-s: 100%;
+          --light-l: 43.3333333333%;
+          --dark: hsla(var(--dark-h), var(--dark-s), var(--dark-l), var(--dark-a));
+          --dark-h: 120deg;
+          --dark-s: 100%;
+          --dark-l: 13.3333333333%;
+          --dark-a: 0.5;
+          --brand: hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+          --brand-h: 54.2201834862deg;
+          --brand-s: 89.3442622951%;
+          --brand-l: 47.8431372549%;
+        }
+      }
+    }
+    @include it('defines nested colors') {
+      @include assert {
+        @include output {
+          @include color-prop.define((
+          --brand: (
+          color: #aaa092,
+          --light: #c3bcb3,
+          --dark: #7c7061
+          )
+          ));
+        }
+        @include expect {
+          --brand: hsla(var(--brand-h), var(--brand-s), var(--brand-l), var(--brand-a));
+          --brand-h: 35deg;
+          --brand-s: 12.3711340206%;
+          --brand-l: 61.9607843137%;
+          --brand-a: 1;
+          --brand--light: hsla(var(--brand--light-h), var(--brand--light-s), var(--brand--light-l), var(--brand--light-a));
+          --brand--light-h: 33.75deg;
+          --brand--light-s: 11.7647058824%;
+          --brand--light-l: 73.3333333333%;
+          --brand--light-a: 1;
+          --brand--dark: hsla(var(--brand--dark-h), var(--brand--dark-s), var(--brand--dark-l), var(--brand--dark-a));
+          --brand--dark-h: 33.3333333333deg;
+          --brand--dark-s: 12.2171945701%;
+          --brand--dark-l: 43.3333333333%;
+          --brand--dark-a: 1;
+        }
+      }
+    }
+  }
+}
