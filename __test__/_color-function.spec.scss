@@ -100,17 +100,17 @@
       @include assert {
         @include output {
           @include color-prop.define((
-          --color: hsl(150deg, 93%, 17%)
+          --no-alpha: hsl(150deg, 93%, 17%)
           ), $forceAlpha: false);
         }
         @include expect {
-          --color: hsl(var(--color-h), var(--color-s), var(--color-l));
-          --color-r: 3;
-          --color-g: 84;
-          --color-b: 43;
-          --color-h: 150deg;
-          --color-s: 93%;
-          --color-l: 17%;
+          --no-alpha: hsl(var(--no-alpha-h), var(--no-alpha-s), var(--no-alpha-l));
+          --no-alpha-r: 3;
+          --no-alpha-g: 84;
+          --no-alpha-b: 43;
+          --no-alpha-h: 150deg;
+          --no-alpha-s: 93%;
+          --no-alpha-l: 17%;
         }
       }
     }
@@ -119,17 +119,17 @@
       @include assert {
         @include output {
           @include color-prop.define((
-          --color: #cb2541
+          --no-alpha: #cb2541
           ), $forceAlpha: false);
         }
         @include expect {
-          --color: hsl(var(--color-h), var(--color-s), var(--color-l));
-          --color-r: 203;
-          --color-g: 37;
-          --color-b: 65;
-          --color-h: 349.8795180723deg;
-          --color-s: 69.1666666667%;
-          --color-l: 47.0588235294%;
+          --no-alpha: hsl(var(--no-alpha-h), var(--no-alpha-s), var(--no-alpha-l));
+          --no-alpha-r: 203;
+          --no-alpha-g: 37;
+          --no-alpha-b: 65;
+          --no-alpha-h: 349.8795180723deg;
+          --no-alpha-s: 69.1666666667%;
+          --no-alpha-l: 47.0588235294%;
         }
       }
     }

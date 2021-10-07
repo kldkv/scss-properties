@@ -159,7 +159,8 @@
   
       $isColor: meta.type-of($color) == 'color';
       $isMap: meta.type-of($color) == 'map';
-      $isAlpha: $forceAlpha or ($isColor and color.alpha($color) != 1);
+      $priorAlpha: map.get(var.$COLORS, $colorName, 'alpha');
+      $isAlpha: $forceAlpha or $priorAlpha or ($isColor and color.alpha($color) != 1);
   
       @if ($isMap) {
         @include define($color, $parent: $name);
