@@ -12,7 +12,6 @@
   @return var($varName);
 }
 
-
 @function calcProperty($parameter, $colorName, $colorProp, $type: null) {
   $property: postfix($colorName, $colorProp);
   $unit: map.get(var.$PROPERTIES, $colorProp, 'unit');
@@ -171,7 +170,7 @@
   } @else if meta.type-of($value) != 'string' {
     @error 'Value for `to-number` should be a number or a string.';
   }
-  
+
   $result: 0;
   $decimal: 0;
   $d: string.index($value, '.');
