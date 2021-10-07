@@ -5,7 +5,7 @@
 @use 'sass:meta';
 @use 'var';
 
-@function makeColor($args...) {
+@function guessColor($args...) {
   $kwargs: meta.keywords($args);
   $rgb: false; $hsl: false;
   $hasAlpha: map.has-key($kwargs, 'alpha') or list.length($args) == 4;
@@ -21,7 +21,7 @@
 
   @if $rgb and $hsl {
     $kwarglist: list.zip(map.keys($kwargs), map.values($kwargs));
-    @return throw.error('Both RGB and HSL arguments supplied: #{$kwarglist}', 'makeColor()');
+    @return throw.error('Both RGB and HSL arguments supplied: #{$kwarglist}', 'guessColor()');
   }
 
   @if not $rgb and not $hsl {
@@ -35,17 +35,30 @@
     }
   }
 
-  @if $rgb {
-    @if $hasAlpha {
-      @return rgba($args...);
-    } @else {
-      @return rgb($args...);
-    }
-  } @else {
-    @if $hasAlpha {
-      @return hsla($args...);
-    } @else {
-      @return hsl($args...);
-    }
+  @if $hasAlpha and $rgb {
+    @return 'rgba';
+  } @else if $hasAlpha and $hsl {
+    @return 'hsla';
+  } @else if $rgb {
+    @return 'rgb';
+  } @else if $hsl {
+    @return 'hsl';
   }
+
+  @return null;
+}
+
+@function makeColor($args...) {
+  $type: guessColor($args...);
+  @if $type == 'rgba' {
+    @return rgba($args...);
+  } @else if $type == 'rgb' {
+    @return rgb($args...);
+  } @else if $type == 'hsla' {
+    @return hsla($args...);
+  } @else if $type == 'hsl' {
+    @return hsl($args...);
+  }
+
+  @return $type;
 }

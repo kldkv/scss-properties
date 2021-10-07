@@ -150,7 +150,7 @@
       $catch-errors: true !global;
       @include it('throws on mixed kwargs') {
         $error: makeColor($red: 255, $saturation: 100%, $lightness: 50%);
-        $expect: 'ERROR [makeColor()]: Both RGB and HSL arguments supplied: red 255, saturation 100%, lightness 50%';
+        $expect: 'ERROR [guessColor()]: Both RGB and HSL arguments supplied: red 255, saturation 100%, lightness 50%';
         @include assert-equal($error, $expect);
       }
     }
