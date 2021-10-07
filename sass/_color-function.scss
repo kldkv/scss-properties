@@ -69,23 +69,23 @@
   @return $ops;
 }
 
-@function _calcHSL($colorName, $function, $args...) {
+@function _calcColor($colorName, $function, $args...) {
   $properties: _calcProperties($colorName, $function, $args...);
   $defaults: map.get(var.$COLORS, $colorName, 'defaults');
   $properties: map.merge($defaults, $properties);
   @return sass-color.makeColor($properties...);
 }
 
-@function adjust($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
-  @return _calcHSL($colorName, var.$ADJUST, $hue: $hue, $saturation: $saturation, $lightness: $lightness, $alpha: $alpha);
+@function adjust($colorName, $args...) {
+  @return _calcColor($colorName, var.$ADJUST, $args...);
 }
 
-@function change($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
-  @return _calcHSL($colorName, var.$CHANGE, $hue: $hue, $saturation: $saturation, $lightness: $lightness, $alpha: $alpha);
+@function change($colorName, $args...) {
+  @return _calcColor($colorName, var.$CHANGE, $args...);
 };
 
-@function scale($colorName, $saturation: null, $lightness: null, $alpha: null) {
-  @return _calcHSL($colorName, var.$SCALE, $saturation: $saturation, $lightness: $lightness, $alpha: $alpha);
+@function scale($colorName, $args...) {
+  @return _calcColor($colorName, var.$SCALE, $args...);
 };
 
 @function _parseSetArg($arg) {
@@ -168,6 +168,9 @@
       @if ($isMap) {
         @include define($color, $parent: $name);
       } @else if ($isColor) {
+        $name-r: #{$name}#{var.$POSTFIX-RED};
+        $name-g: #{$name}#{var.$POSTFIX-GREEN};
+        $name-b: #{$name}#{var.$POSTFIX-BLUE};
         $name-h: #{$name}#{var.$POSTFIX-HUE};
         $name-s: #{$name}#{var.$POSTFIX-SATURATION};
         $name-l: #{$name}#{var.$POSTFIX-LIGHTNESS};
@@ -183,6 +186,9 @@
         }
   
         #{$name}: sass-color.makeColor($defaults...);
+        #{$name-r}: color.red($color);
+        #{$name-g}: color.green($color);
+        #{$name-b}: color.blue($color);
         #{$name-h}: color.hue($color);
         #{$name-s}: color.saturation($color);
         #{$name-l}: color.lightness($color);

@@ -25,6 +25,9 @@
         }
         @include expect {
           --color: hsla(var(--color-h), var(--color-s), var(--color-l), var(--color-a));
+          --color-r: 220;
+          --color-g: 244;
+          --color-b: 224;
           --color-h: 131deg;
           --color-s: 53%;
           --color-l: 91%;
@@ -42,6 +45,9 @@
         }
         @include expect {
           --color: hsla(var(--color-h), var(--color-s), var(--color-l), var(--color-a));
+          --color-r: 191;
+          --color-g: 137;
+          --color-b: 194;
           --color-h: 296.8421052632deg;
           --color-s: 31.843575419%;
           --color-l: 64.9019607843%;
@@ -59,6 +65,9 @@
         }
         @include expect {
           --color: hsla(var(--color-h), var(--color-s), var(--color-l), var(--color-a));
+          --color-r: 3;
+          --color-g: 69;
+          --color-b: 140;
           --color-h: 211deg;
           --color-s: 96%;
           --color-l: 28%;
@@ -76,6 +85,9 @@
         }
         @include expect {
           --color: hsla(var(--color-h), var(--color-s), var(--color-l), var(--color-a));
+          --color-r: 34;
+          --color-g: 36;
+          --color-b: 43;
           --color-h: 226.6666666667deg;
           --color-s: 11.6883116883%;
           --color-l: 15.0980392157%;
@@ -93,6 +105,9 @@
         }
         @include expect {
           --color: hsl(var(--color-h), var(--color-s), var(--color-l));
+          --color-r: 3;
+          --color-g: 84;
+          --color-b: 43;
           --color-h: 150deg;
           --color-s: 93%;
           --color-l: 17%;
@@ -109,6 +124,9 @@
         }
         @include expect {
           --color: hsl(var(--color-h), var(--color-s), var(--color-l));
+          --color-r: 203;
+          --color-g: 37;
+          --color-b: 65;
           --color-h: 349.8795180723deg;
           --color-s: 69.1666666667%;
           --color-l: 47.0588235294%;
@@ -127,15 +145,24 @@
         }
         @include expect {
           --light: hsl(var(--light-h), var(--light-s), var(--light-l));
+          --light-r: 221;
+          --light-g: 170;
+          --light-b: 0;
           --light-h: 46.1538461538deg;
           --light-s: 100%;
           --light-l: 43.3333333333%;
           --dark: hsla(var(--dark-h), var(--dark-s), var(--dark-l), var(--dark-a));
+          --dark-r: 0;
+          --dark-g: 68;
+          --dark-b: 0;
           --dark-h: 120deg;
           --dark-s: 100%;
           --dark-l: 13.3333333333%;
           --dark-a: 0.5;
           --brand: hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+          --brand-r: 231;
+          --brand-g: 210;
+          --brand-b: 13;
           --brand-h: 54.2201834862deg;
           --brand-s: 89.3442622951%;
           --brand-l: 47.8431372549%;
@@ -156,16 +183,25 @@
         }
         @include expect {
           --brand: hsla(var(--brand-h), var(--brand-s), var(--brand-l), var(--brand-a));
+          --brand-r: 170;
+          --brand-g: 160;
+          --brand-b: 146;
           --brand-h: 35deg;
           --brand-s: 12.3711340206%;
           --brand-l: 61.9607843137%;
           --brand-a: 1;
           --brand--light: hsla(var(--brand--light-h), var(--brand--light-s), var(--brand--light-l), var(--brand--light-a));
+          --brand--light-r: 195;
+          --brand--light-g: 188;
+          --brand--light-b: 179;
           --brand--light-h: 33.75deg;
           --brand--light-s: 11.7647058824%;
           --brand--light-l: 73.3333333333%;
           --brand--light-a: 1;
           --brand--dark: hsla(var(--brand--dark-h), var(--brand--dark-s), var(--brand--dark-l), var(--brand--dark-a));
+          --brand--dark-r: 124;
+          --brand--dark-g: 112;
+          --brand--dark-b: 97;
           --brand--dark-h: 33.3333333333deg;
           --brand--dark-s: 12.2171945701%;
           --brand--dark-l: 43.3333333333%;
