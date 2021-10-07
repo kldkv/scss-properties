@@ -2,41 +2,147 @@
 
 @use 'sass:math';
 @use 'sass:string';
-@use '../sass/color' as sass-color;
+@use '../sass/color' as *;
 @use '../sass/var';
 @use '../sass/utils';
 
 @include describe('color') {
-  @include it('Correct create HSL/HSLA') {
+  @include describe('makeColor') {
 
-    @for $i from 1 through 10 {
-      $hue:        #{(math.random($limit: 361) - 1) * var.$UNIT-DEG};
-      $saturation: #{(math.random($limit: 101) - 1) * var.$UNIT-PERCENT};
-      $lightness:  #{(math.random($limit: 101) - 1) * var.$UNIT-PERCENT};
+    @include describe('creates hsl colors') {
+      @include it('using kwargs') {
+        $output: makeColor($saturation: var(--test-s), $lightness: var(--test-l), $hue: var(--test-h));
+        $expect: 'hsl(var(--test-h), var(--test-s), var(--test-l))';
+        @include assert-equal($output, $expect);
+      }
 
-      // parseInt($alpha.toFixed(2), 10);
-      $alpha: utils.to-number(str-slice(string.unquote(#{math.random()}), 0, -4));
-      $has-alpha: math.round(math.random()) == 1;
-  
-      @if($has-alpha and $alpha < 1) {
-        @include assert-equal(
-          sass-color.makeHSL(
-            $hue: $hue,
-            $saturation: $saturation,
-            $lightness: $lightness,
-            $alpha: $alpha,
-          ),
-          string.unquote('hsla(#{$hue}, #{$saturation}, #{$lightness}, #{$alpha})')
-        );
-      } @else {
-        @include assert-equal(
-          sass-color.makeHSL(
-            $hue: $hue,
-            $saturation: $saturation,
-            $lightness: $lightness,
-          ),
-          string.unquote('hsl(#{$hue}, #{$saturation}, #{$lightness})')
-        );
+      $expect: 'hsl(240deg, 80%, var(--test-l))';
+      @include it('using positional args') {
+        $output: makeColor(240deg, 80%, var(--test-l));
+        @include assert-equal($output, $expect);
+      }
+      @include it ('using mixed args') {
+        $output: makeColor(240deg, $saturation: 80%, $lightness: var(--test-l));
+        @include assert-equal($output, $expect);
+      }
+    }
+
+    @include describe('creates hsla colors') {
+      @include it('using kwargs') {
+        $output: makeColor($saturation: var(--test-s), $alpha: var(--test-a), $lightness: var(--test-l), $hue: var(--test-h));
+        $expect: 'hsla(var(--test-h), var(--test-s), var(--test-l), var(--test-a))';
+        @include assert-equal($output, $expect);
+      }
+
+      $expect: 'hsla(var(--test-h), 80%, 50%, 0.8)';
+      @include it('using positional args') {
+        $output: makeColor(var(--test-h), 80%, 50%, 0.8);
+        @include assert-equal($output, $expect);
+      }
+      @include it('using mixed args') {
+        $output: makeColor(var(--test-h), 80%, $lightness: 50%, $alpha: 0.8);
+        @include assert-equal($output, $expect);
+      }
+
+      @include it('using an alpha of 1') {
+        $output: makeColor(var(--test-h), 80%, 50%, 1);
+        $expect: 'hsla(var(--test-h), 80%, 50%, 1)';
+        @include assert-equal($output, $expect);
+      }
+    }
+
+    @include describe('creates rgb colors') {
+      @include it('using kwargs') {
+        $output: makeColor($red: var(--test-r), $blue: var(--test-b), $green: var(--test-g));
+        $expect: 'rgb(var(--test-r), var(--test-g), var(--test-b))';
+        @include assert-equal($output, $expect);
+      }
+
+      $expect: 'rgb(255, var(--test-g), 120)';
+      @include it('using positional args') {
+        $output: makeColor(255, var(--test-g), 120);
+        @include assert-equal($output, $expect);
+      }
+      @include it('using mixed args') {
+        $output: makeColor(255, var(--test-g), $blue: 120);
+        @include assert-equal($output, $expect);
+      }
+    }
+
+    @include describe('creates rgba colors') {
+      @include it('using kwargs') {
+        $output: makeColor($red: var(--test-r), $blue: var(--test-b), $alpha: var(--test-a), $green: var(--test-g));
+        $expect: 'rgba(var(--test-r), var(--test-g), var(--test-b), var(--test-a))';
+        @include assert-equal($output, $expect);
+      }
+
+      $expect: 'rgba(255, var(--test-g), 120, 0.2)';
+      @include it('using positional args') {
+        $output: makeColor(255, var(--test-g), 120, 0.2);
+        @include assert-equal($output, $expect);
+      }
+      @include it('using mixed args') {
+        $output: makeColor(255, $blue: 120, $alpha: 0.2, $green: var(--test-g));
+        @include assert-equal($output, $expect);
+      }
+
+      @include it('using an alpha of 1') {
+        $output: makeColor(255, $blue: 120, $alpha: 1, $green: var(--test-g));
+        $expect: 'rgba(255, var(--test-g), 120, 1)';
+        @include assert-equal($output, $expect);
+      }
+
+      $expect: rgba(26, 26, 230, 0.6);
+      @include it('using rgba number args') {
+        $output: makeColor(26, 26, 230, 0.6);
+        @include assert-equal($output, $expect);
+      }
+      @include it('using hsla number args') {
+        $output: makeColor(240deg, 80%, 50%, 0.6);
+        @include assert-equal($output, $expect);
+      }
+      @include it('using unitless hsla kwargs') {
+        $output: makeColor(240, $saturation: 80, $lightness: 50, $alpha: 0.6);
+        @include assert-equal($output, $expect);
+      }
+    }
+
+    @include describe('creates hex colors') {
+
+      $expect: #1414b8;
+      @include it('using hsl kwargs') {
+        $output: makeColor($hue: 240deg, $saturation: 80%, $lightness: 40%);
+        @include assert-equal($output, $expect);
+      }
+      @include it('using hsl positional args') {
+        $output: makeColor(240deg, 80%, 40%);
+        @include assert-equal($output, $expect);
+      }
+      @include it('using hsl positional args and kwargs') {
+        $output: makeColor(240, $saturation: 80, $lightness: 40);
+        @include assert-equal($output, $expect);
+      }
+      @include it('using partially ambiguous positional args') {
+        $output: makeColor(240, 80%, 40);
+        @include assert-equal($output, $expect);
+      }
+
+      $expect: #c82890;
+      @include it('using rgb kwargs') {
+        $output: makeColor($green: 40, $blue: 144, $red: 200);
+        @include assert-equal($output, $expect);
+      }
+      @include it('using unitless positional args') {
+        $output: makeColor(200, 40, 144);
+        @include assert-equal($output, $expect);
+      }
+      @include it('using rgb positional args and kwargs') {
+        $output: makeColor(200, 40, $blue: 144);
+        @include assert-equal($output, $expect);
+      }
+      @include it('using an alpha of 1') {
+        $output: makeColor(200, 40, $blue: 144, $alpha: 1);
+        @include assert-equal($output, $expect);
       }
     }
   }
