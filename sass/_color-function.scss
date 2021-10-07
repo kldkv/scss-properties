@@ -44,16 +44,12 @@
   @return math.abs(color.hue($color1) - color.hue($color2)) > 180deg;
 }
 
-// also allow mixing different values by different weights?
-@function mix($colorName1, $colorName2, $weight: 50%, $hue: null, $saturation: null, $lightness: null, $alpha: null, $invert-hue: null) {
-  $valid: _validate(($colorName1, $colorName2), ('weight' $weight, 'weight' $hue, 'weight' $saturation, 'weight' $lightness, 'weight' $alpha), $type: 'mix');
-  $invert: _invertHue($colorName1, $colorName2);
-  $invert: if($invert-hue, not $invert, $invert);
+@function mix($colorName1, $colorName2, $weight: 50%, $red: null, $green: null, $blue: null, $alpha: null) {
   @return sass-color.makeColor(
-    $hue:         utils.calcMix($colorName1, $colorName2, $hue or $weight, var.$HUE, $modify: $invert and -360deg),
-    $saturation:  utils.calcMix($colorName1, $colorName2, $saturation or $weight, var.$SATURATION),
-    $lightness:   utils.calcMix($colorName1, $colorName2, $lightness or $weight, var.$LIGHTNESS),
-    $alpha:       utils.calcMix($colorName1, $colorName2, $alpha or $weight, var.$ALPHA),
+    $red:   utils.calcMix($colorName1, $colorName2, $red or $weight, var.$RED),
+    $green: utils.calcMix($colorName1, $colorName2, $green or $weight, var.$GREEN),
+    $blue:  utils.calcMix($colorName1, $colorName2, $blue or $weight, var.$BLUE),
+    $alpha: utils.calcMix($colorName1, $colorName2, $alpha or $weight, var.$ALPHA),
   );
 }
 
