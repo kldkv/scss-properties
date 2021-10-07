@@ -49,7 +49,7 @@
   $valid: _validate(($colorName1, $colorName2), ('weight' $weight, 'weight' $hue, 'weight' $saturation, 'weight' $lightness, 'weight' $alpha), $type: 'mix');
   $invert: _invertHue($colorName1, $colorName2);
   $invert: if($invert-hue, not $invert, $invert);
-  @return sass-color.makeHSL(
+  @return sass-color.makeColor(
     $hue:         utils.calcMix($colorName1, $colorName2, $hue or $weight, var.$HUE, $modify: $invert and -360deg),
     $saturation:  utils.calcMix($colorName1, $colorName2, $saturation or $weight, var.$SATURATION),
     $lightness:   utils.calcMix($colorName1, $colorName2, $lightness or $weight, var.$LIGHTNESS),
@@ -73,7 +73,7 @@
   $properties: _calcProperties($colorName, $function, $args...);
   $defaults: map.get(var.$COLORS, $colorName, 'defaults');
   $properties: map.merge($defaults, $properties);
-  @return sass-color.makeHSL($properties...);
+  @return sass-color.makeColor($properties...);
 }
 
 @function adjust($colorName, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
@@ -147,7 +147,7 @@
 
   $defaults: map.get(var.$COLORS, $colorName, 'defaults');
   $properties: map.merge($defaults, $ops);
-  @return sass-color.makeHSL($properties...);
+  @return sass-color.makeColor($properties...);
 }
 
 @mixin define($colorMap, $parent: '', $forceAlpha: true) {
@@ -182,7 +182,7 @@
           $defaults: map.set($defaults, var.$ALPHA, var($name-a));
         }
   
-        #{$name}: sass-color.makeHSL($defaults...);
+        #{$name}: sass-color.makeColor($defaults...);
         #{$name-h}: color.hue($color);
         #{$name-s}: color.saturation($color);
         #{$name-l}: color.lightness($color);

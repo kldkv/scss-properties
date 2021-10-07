@@ -1,9 +1,49 @@
-@use 'sass:string';
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'var';
 
-@function makeHSL($hue: null, $saturation: null, $lightness: null, $alpha: null) {
-  @if ($alpha) {
-    @return #{string.unquote('hsla(#{$hue}, #{$saturation}, #{$lightness}, #{$alpha})')}
+@function makeColor($args...) {
+  $kwargs: meta.keywords($args);
+  $rgb: false; $hsl: false;
+  $hasAlpha: map.has-key($kwargs, 'alpha') or list.length($args) == 4;
+  @if not $rgb and not $hsl {
+    @each $property in map.keys($kwargs) {
+      @if list.index(var.$RGB, $property) {
+        $rgb: true;
+      } @else if list.index(var.$HSL, $property) {
+        $hsl: true;
+      }
+    }
   }
 
-  @return #{string.unquote('hsl(#{$hue}, #{$saturation}, #{$lightness})')};
+  @if $rgb and $hsl {
+    @error 'Both RGB and HSL arguments supplied: #{$kwargs}';
+  }
+
+  @if not $rgb and not $hsl {
+    $rgb: true; $i: 1;
+    @while $rgb and $i <= list.length($args) {
+      $a: list.nth($args, $i);
+      @if meta.type-of($a) == 'number' and not math.is-unitless($a) {
+        $rgb: false; $hsl: true;
+      }
+      $i: $i + 1;
+    }
+  }
+
+  @if $rgb {
+    @if $hasAlpha {
+      @return rgba($args...);
+    } @else {
+      @return rgb($args...);
+    }
+  } @else {
+    @if $hasAlpha {
+      @return hsla($args...);
+    } @else {
+      @return hsl($args...);
+    }
+  }
 }
