@@ -4,12 +4,37 @@
 @use 'sass:math';
 @use 'sass:meta';
 @use 'sass:string';
+@use 'color' as sass-color;
 @use 'var';
 
 @function postfix($colorName, $colorProp) {
   $postfix: map.get(var.$PROPERTIES, $colorProp, 'postfix');
   $varName: #{$colorName}#{$postfix};
   @return var($varName);
+}
+
+@function formatArgList($args...) {
+  $type: sass-color.guessColor($args...);
+  $kwargs: meta.keywords($args);
+  $argMap: ();
+
+  $argKeys: null;
+  @if $type == 'rgb' or $type == 'rgba' {
+    $argKeys: var.$RGBA;
+  } @else if $type == 'hsl' or $type == 'hsla' {
+    $argKeys: var.$HSLA;
+  } @else {
+    @return $type;
+  }
+
+  $positional: list.zip($argKeys, $args);
+  @each $k, $v in $positional {
+    @if map.has-key($kwargs, $k) {
+      @error '#{$k} declared twice';
+    }
+    $argMap: map.set($argMap, string.unquote($k), $v);
+  }
+  @return map.merge($argMap, $kwargs);
 }
 
 @function calcProperty($parameter, $colorName, $colorProp, $type: null) {

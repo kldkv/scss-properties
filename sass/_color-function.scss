@@ -58,7 +58,7 @@
 }
 
 @function _calcProperties($colorName, $function, $args...) {
-  $kwargs: meta.keywords($args);
+  $kwargs: utils.formatArgList($args...);
   $valid: _validate($colorName, $kwargs, $function);
   $ops: ();
   @each $property, $value in $kwargs {
