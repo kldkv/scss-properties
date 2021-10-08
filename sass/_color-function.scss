@@ -204,16 +204,9 @@
         $name-l: #{$name}#{var.$POSTFIX-LIGHTNESS};
         $name-a: #{$name}#{var.$POSTFIX-ALPHA};
   
-        $defaults: (
-          #{var.$HUE}: var($name-h),
-          #{var.$SATURATION}: var($name-s),
-          #{var.$LIGHTNESS}: var($name-l)
-        );
-        @if ($isAlpha) {
-          $defaults: map.set($defaults, var.$ALPHA, var($name-a));
-        }
+        $type: if($isAlpha, var.$HSLA, var.$HSL);
   
-        #{$name}: sass-color.makeColor($defaults...);
+        #{$name}: sass-color.makeColor(_defaults($name, $type)...);
         #{$name-r}: color.red($color);
         #{$name-g}: color.green($color);
         #{$name-b}: color.blue($color);
