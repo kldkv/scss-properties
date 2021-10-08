@@ -8,10 +8,27 @@
 @use 'utils';
 @use 'color' as clr;
 
+@function _getColorType($colors, $function, $args...) {
+  $colorType: args.parseKwargs($args...);
+  @if not $colorType {
+    @if $function == var.$SCALE {
+      $colorType: var.$HSL;
+    } @else if $function == var.$MIX {
+      $colorType: var.$RGB;
+    } @else {
+      $colorType: args.parsePositional($args...) or var.$HSL;
+    }
+  }
+  @if list.length($colorType) == 3 and clr.hasAlpha($colors...) or args.hasAlpha($args...) {
+    $colorType: list.append($colorType, var.$ALPHA);
+  }
+  $valid: args.validate($function, $colors, $args...);
+  @return $colorType;
+}
+
 @function mix($colorName1, $colorName2, $weight: 50%, $args...) {
-  $colorType: args.parseKwargs($args...) or var.$RGBA;
+  $colorType: _getColorType($colorName1 $colorName2, var.$MIX, $weight: $weight, $args...);
   $kwargs: args.normalize($colorType, $args...);
-  $valid: args.validate(var.$MIX, ($colorName1, $colorName2), $weight: $weight, $kwargs...);
   $ops: ();
 
   @each $property in $colorType {
@@ -24,7 +41,6 @@
 
 @function _calcProperties($colorName, $function, $args...) {
   $kwargs: meta.keywords($args);
-  $valid: args.validate($function, $colorName, $kwargs...);
   $ops: ();
   @each $property, $value in $kwargs {
     @if $value {
@@ -35,22 +51,7 @@
 }
 
 @function _calcColor($colorName, $function, $args...) {
-  $colorType: args.parseKwargs($args...);
-  @if not $colorType {
-    @if $function == var.$SCALE {
-      @if args.hasAlpha($args...) {
-        $colorType: var.$HSLA;
-      } @else {
-        $colorType: var.$HSL;
-      }
-    } @else {
-      $colorType: args.parsePositional($args...);
-    }
-  }
-  $colorType: $colorType or var.$HSL;
-  @if list.length($colorType) == 3 and clr.hasAlpha($colorName) {
-    $colorType: list.append($colorType, var.$ALPHA);
-  }
+  $colorType: _getColorType($colorName, $function, $args...);
   $kwargs: args.normalize($colorType, $args...);
   $properties: _calcProperties($colorName, $function, $kwargs...);
   $defaults: clr.defaults($colorName, $colorType);
