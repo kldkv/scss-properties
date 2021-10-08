@@ -59,9 +59,25 @@
   @return $ops;
 }
 
+@function _hasAlpha($colorName) {
+  @return map.get(var.$COLORS, $colorName, 'alpha');
+}
+
+@function _defaults($colorName, $args...) {
+  $properties: sass-color.guessColor($args...);
+  @if list.length($properties) == 3 and _hasAlpha($colorName) {
+    $properties: list.append($properties, var.$ALPHA);
+  }
+  $ops: ();
+  @each $property in $properties {
+    $ops: map.set($ops, $property, utils.postfix($colorName, $property));
+  }
+  @return $ops;
+}
+
 @function _calcColor($colorName, $function, $args...) {
   $properties: _calcProperties($colorName, $function, $args...);
-  $defaults: map.get(var.$COLORS, $colorName, 'defaults');
+  $defaults: _defaults($colorName, $args...);
   $properties: map.merge($defaults, $properties);
   @return sass-color.makeColor($properties...);
 }
@@ -135,7 +151,7 @@
     }
   }
 
-  $defaults: map.get(var.$COLORS, $colorName, 'defaults');
+  $defaults: map.get(var.$COLORS, $colorName, 'defaults'); // this needs to change
   $properties: map.merge($defaults, $ops);
   @return sass-color.makeColor($properties...);
 }
@@ -153,7 +169,7 @@
   
       $isColor: meta.type-of($color) == 'color';
       $isMap: meta.type-of($color) == 'map';
-      $priorAlpha: map.get(var.$COLORS, $colorName, 'alpha');
+      $priorAlpha: _hasAlpha($colorName);
       $isAlpha: $forceAlpha or $priorAlpha or ($isColor and color.alpha($color) != 1);
   
       @if ($isMap) {
@@ -190,7 +206,6 @@
         var.$COLORS: map.set(var.$COLORS, $name, (
           'color': $color,
           'alpha': $isAlpha,
-          'defaults': $defaults
         ));
       } @else {
         #{$name}: $color;
