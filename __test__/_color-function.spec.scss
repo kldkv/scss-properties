@@ -1,17 +1,11 @@
 @use '../node_modules/sass-true/sass/true' as *;
 
-@use 'sass:color';
-@use 'sass:map';
-@use 'sass:math';
-@use 'sass:string';
-@use '../sass/var' with (
+@use '../index' as color-prop with (
   $POSTFIX-HUE: '-h',
   $POSTFIX-SATURATION: '-s',
   $POSTFIX-LIGHTNESS: '-l',
   $POSTFIX-ALPHA: '-a',
 );
-@use '../sass/color-function' as color-prop;
-@use '../sass/utils';
 
 @include describe('User functions') {
   @include describe('define') {
