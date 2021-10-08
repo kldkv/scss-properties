@@ -25,13 +25,17 @@
   }
 
   @if not $rgb and not $hsl {
-    $rgb: true; $i: 1;
-    @while $rgb and $i <= list.length($args) {
-      $a: list.nth($args, $i);
-      @if meta.type-of($a) == 'number' and not math.is-unitless($a) {
-        $rgb: false; $hsl: true;
+    @if list.length($args) > 0 {
+      $rgb: true; $i: 1;
+      @while $rgb and $i <= list.length($args) {
+        $a: list.nth($args, $i);
+        @if meta.type-of($a) == 'number' and not math.is-unitless($a) {
+          $rgb: false; $hsl: true;
+        }
+        $i: $i + 1;
       }
-      $i: $i + 1;
+    } @else {
+      $hsl: true;
     }
   }
 
