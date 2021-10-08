@@ -113,6 +113,16 @@
 
 @function validate($function, $colors, $args...) {
   $propValues: meta.keywords($args);
+
+  @if list.length($args) > 0 {
+    // if not already normalized, normalize args
+    $type: parseKwargs($args...) or parsePositional($args...);
+    @if not $type {
+      $type: if($function == var.$MIX, var.$RGBA, var.$HSLA);
+    }
+    $propValues: normalize($type, $args...);
+  }
+
   @each $colorName in $colors {
     @if not (meta.type-of($colorName) == 'string' and map.has-key(var.$COLORS, $colorName)) {
       @error '#{$colorName} is not a defined color.';
