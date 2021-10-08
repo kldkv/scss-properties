@@ -106,7 +106,7 @@
   @if ($isNumber) {
     $allowNegative: $function and $function == var.$ADJUST or $function == var.$SCALE;
     $rangeValue: if($allowNegative, math.abs($value), $value);
-    $unitTest: $unitTest and $min < $rangeValue and $rangeValue < $max;
+    $unitTest: $unitTest and $min <= $rangeValue and $rangeValue <= $max;
   }
   @return meta.type-of($value) == 'string' or $unitTest;
 }
