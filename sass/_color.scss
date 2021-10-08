@@ -1,5 +1,19 @@
+@use 'sass:map';
 @use 'args';
 @use 'var';
+@use 'utils';
+
+@function hasAlpha($colorName) {
+  @return map.get(var.$COLORS, $colorName, 'alpha');
+}
+
+@function defaults($colorName, $properties: var.$HSL) {
+  $ops: ();
+  @each $property in $properties {
+    $ops: map.set($ops, $property, utils.postfix($colorName, $property));
+  }
+  @return $ops;
+}
 
 @function makeColor($args...) {
   $type: args.parseKwargs($args...) or args.parsePositional($args...);

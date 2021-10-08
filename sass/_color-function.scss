@@ -6,7 +6,7 @@
 @use 'var';
 @use 'args';
 @use 'utils';
-@use 'color' as sass-color;
+@use 'color' as clr;
 
 @function mix($colorName1, $colorName2, $weight: 50%, $args...) {
   $colorType: args.parseKwargs($args...) or var.$RGBA;
@@ -19,7 +19,7 @@
     $ops: map.set($ops, $property, utils.calcMix($colorName1, $colorName2, $w, $property));
   }
 
-  @return sass-color.makeColor($ops...);
+  @return clr.makeColor($ops...);
 }
 
 @function _calcProperties($colorName, $function, $args...) {
@@ -30,18 +30,6 @@
     @if $value {
       $ops: map.set($ops, $property, utils.calcProperty($value, $colorName, $property, $function));
     }
-  }
-  @return $ops;
-}
-
-@function _hasAlpha($colorName) {
-  @return map.get(var.$COLORS, $colorName, 'alpha');
-}
-
-@function _defaults($colorName, $properties: var.$HSL) {
-  $ops: ();
-  @each $property in $properties {
-    $ops: map.set($ops, $property, utils.postfix($colorName, $property));
   }
   @return $ops;
 }
@@ -60,14 +48,14 @@
     }
   }
   $colorType: $colorType or var.$HSL;
-  @if list.length($colorType) == 3 and _hasAlpha($colorName) {
+  @if list.length($colorType) == 3 and clr.hasAlpha($colorName) {
     $colorType: list.append($colorType, var.$ALPHA);
   }
   $kwargs: args.normalize($colorType, $args...);
   $properties: _calcProperties($colorName, $function, $kwargs...);
-  $defaults: _defaults($colorName, $colorType);
+  $defaults: clr.defaults($colorName, $colorType);
   $properties: map.merge($defaults, $properties);
-  @return sass-color.makeColor($properties...);
+  @return clr.makeColor($properties...);
 }
 
 @function adjust($colorName, $args...) {
@@ -141,7 +129,7 @@
 
   $defaults: map.get(var.$COLORS, $colorName, 'defaults'); // this needs to change
   $properties: map.merge($defaults, $ops);
-  @return sass-color.makeColor($properties...);
+  @return clr.makeColor($properties...);
 }
 
 @mixin define($colorMap, $parent: '', $forceAlpha: true) {
@@ -157,7 +145,7 @@
   
       $isColor: meta.type-of($color) == 'color';
       $isMap: meta.type-of($color) == 'map';
-      $priorAlpha: _hasAlpha($colorName);
+      $priorAlpha: clr.hasAlpha($colorName);
       $isAlpha: $forceAlpha or $priorAlpha or ($isColor and color.alpha($color) != 1);
   
       @if ($isMap) {
@@ -173,7 +161,7 @@
   
         $type: if($isAlpha, var.$HSLA, var.$HSL);
   
-        #{$name}: sass-color.makeColor(_defaults($name, $type)...);
+        #{$name}: clr.makeColor(clr.defaults($name, $type)...);
         #{$name-r}: color.red($color);
         #{$name-g}: color.green($color);
         #{$name-b}: color.blue($color);
