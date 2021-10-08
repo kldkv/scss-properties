@@ -5,38 +5,55 @@
 @use 'sass:meta';
 @use 'var';
 
-@function guessColor($args...) {
+@function parseArgs($args...) {
   $kwargs: meta.keywords($args);
-  $rgb: false; $hsl: false;
+  @if list.length($args) == 0 {
+    @return null;
+  }
+
   $hasAlpha: map.has-key($kwargs, 'alpha') or list.length($args) == 4;
-  @if not $rgb and not $hsl {
-    @each $property in map.keys($kwargs) {
-      @if list.index(var.$RGB, $property) {
+  $rgb: false; $hsl: false;
+
+  @each $arg in $args {
+    @if meta.type-of($arg) == 'number' {
+      @if math.is-unitless($arg) {
         $rgb: true;
-      } @else if list.index(var.$HSL, $property) {
+      } @else {
         $hsl: true;
       }
     }
   }
 
-  @if $rgb and $hsl {
-    $kwarglist: list.zip(map.keys($kwargs), map.values($kwargs));
-    @return throw.error('Both RGB and HSL arguments supplied: #{$kwarglist}', 'guessColor()');
+  // return hsl if *any* args have units
+  @if $hasAlpha and $hsl {
+    @return var.$HSLA;
+  } @else if $hsl {
+    @return var.$HSL;
+  } @else if $hasAlpha and $rgb {
+    @return var.$RGBA;
+  } @else if $rgb {
+    @return var.$RGB;
   }
 
-  @if not $rgb and not $hsl {
-    @if list.length($args) > 0 {
-      $rgb: true; $i: 1;
-      @while $rgb and $i <= list.length($args) {
-        $a: list.nth($args, $i);
-        @if meta.type-of($a) == 'number' and not math.is-unitless($a) {
-          $rgb: false; $hsl: true;
-        }
-        $i: $i + 1;
-      }
-    } @else {
+  // return null if no args are numbers
+  @return null;
+}
+
+@function parseKwargs($args...) {
+  $kwargs: meta.keywords($args);
+  $rgb: false; $hsl: false;
+  $hasAlpha: map.has-key($kwargs, 'alpha');
+  @each $property in map.keys($kwargs) {
+    @if list.index(var.$RGB, $property) {
+      $rgb: true;
+    } @else if list.index(var.$HSL, $property) {
       $hsl: true;
     }
+  }
+
+  @if $rgb and $hsl {
+    $kwarglist: list.zip(map.keys($kwargs), map.values($kwargs));
+    @return throw.error('Both RGB and HSL arguments supplied: #{$kwarglist}', 'parseKwargs()');
   }
 
   @if $hasAlpha and $rgb {
@@ -53,7 +70,16 @@
 }
 
 @function makeColor($args...) {
-  $type: guessColor($args...);
+  $type: parseKwargs($args...) or parseArgs($args...);
+  @if not $type {
+    $kwargs: meta.keywords($args);
+    @if map.has-key($kwargs, 'alpha') or list.length($args) == 4 {
+      $type: var.$HSLA;
+    } @else {
+      $type: var.$HSL;
+    }
+  }
+
   @if $type == var.$RGBA {
     @return rgba($args...);
   } @else if $type == var.$RGB {

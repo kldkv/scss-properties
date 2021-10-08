@@ -30,7 +30,8 @@
   @return meta.type-of($value) == 'string' or $unitTest;
 }
 
-@function _validate($colors, $propValues: (), $type: null) {
+@function _validate($type, $colors, $args...) {
+  $propValues: meta.keywords($args);
   @each $colorName in $colors {
     @if not (meta.type-of($colorName) == 'string' and map.has-key(var.$COLORS, $colorName)) {
       @error '#{$colorName} is not a defined color.';
@@ -44,18 +45,23 @@
   @return true;
 }
 
-@function mix($colorName1, $colorName2, $weight: 50%, $red: null, $green: null, $blue: null, $alpha: null) {
-  @return sass-color.makeColor(
-    $red:   utils.calcMix($colorName1, $colorName2, $red or $weight, var.$RED),
-    $green: utils.calcMix($colorName1, $colorName2, $green or $weight, var.$GREEN),
-    $blue:  utils.calcMix($colorName1, $colorName2, $blue or $weight, var.$BLUE),
-    $alpha: utils.calcMix($colorName1, $colorName2, $alpha or $weight, var.$ALPHA),
-  );
+@function mix($colorName1, $colorName2, $weight: 50%, $args...) {
+  $colorType: sass-color.parseKwargs($args...) or var.$RGBA;
+  $kwargs: utils.formatArgList($colorType, $args...);
+  $valid: _validate(var.$MIX, ($colorName1, $colorName2), $weight: $weight, $kwargs...);
+  $ops: ();
+
+  @each $property in $colorType {
+    $w: map.get($kwargs, $property) or $weight;
+    $ops: map.set($ops, $property, utils.calcMix($colorName1, $colorName2, $w, $property));
+  }
+
+  @return sass-color.makeColor($ops...);
 }
 
 @function _calcProperties($colorName, $function, $args...) {
-  $kwargs: utils.formatArgList($args...);
-  $valid: _validate($colorName, $kwargs, $function);
+  $kwargs: meta.keywords($args);
+  $valid: _validate($function, $colorName, $kwargs...);
   $ops: ();
   @each $property, $value in $kwargs {
     @if $value {
@@ -69,11 +75,7 @@
   @return map.get(var.$COLORS, $colorName, 'alpha');
 }
 
-@function _defaults($colorName, $args...) {
-  $properties: sass-color.guessColor($args...);
-  @if list.length($properties) == 3 and _hasAlpha($colorName) {
-    $properties: list.append($properties, var.$ALPHA);
-  }
+@function _defaults($colorName, $properties: var.$HSL) {
   $ops: ();
   @each $property in $properties {
     $ops: map.set($ops, $property, utils.postfix($colorName, $property));
@@ -82,8 +84,21 @@
 }
 
 @function _calcColor($colorName, $function, $args...) {
-  $properties: _calcProperties($colorName, $function, $args...);
-  $defaults: _defaults($colorName, $args...);
+  $colorType: sass-color.parseKwargs($args...);
+  @if not $colorType {
+    @if $function == var.$SCALE {
+      $colorType: var.$HSL;
+    } @else {
+      $colorType: sass-color.parseArgs($args...);
+    }
+  }
+  $colorType: $colorType or var.$HSL;
+  @if list.length($colorType) == 3 and _hasAlpha($colorName) {
+    $colorType: list.append($colorType, var.$ALPHA);
+  }
+  $kwargs: utils.formatArgList($colorType, $args...);
+  $properties: _calcProperties($colorName, $function, $kwargs...);
+  $defaults: _defaults($colorName, $colorType);
   $properties: map.merge($defaults, $properties);
   @return sass-color.makeColor($properties...);
 }
@@ -120,13 +135,13 @@
   @if $type == 'mix' {
     $colorName2: list.nth($settings, 1); // allow map as well
     $weight: list.nth($settings, 2) or 50%;
-    $valid: _validate(($colorName, $colorName2), ('weight': $weight), $type: 'mix');
+    $valid: _validate(var.$MIX, ($colorName, $colorName2), $weight: $weight);
     $invert: $property == var.$HUE and _invertHue($colorName, $colorName2);
     // invert option
     @return utils.calcMix($colorName, $colorName2, $weight, $property, $modify: $invert and -360deg);
   } @else {
     $param: list.nth($settings, 1);
-    $valid: _validate($colorName, (#{$property}: $param), $type);
+    $valid: _validate($type, $colorName, (#{$property}: $param)...);
     @return utils.calcProperty($param, $colorName, $property, $type);
   }
 }

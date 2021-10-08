@@ -13,21 +13,11 @@
   @return var($varName);
 }
 
-@function formatArgList($args...) {
-  $type: sass-color.guessColor($args...);
+@function formatArgList($colorProps, $args...) {
   $kwargs: meta.keywords($args);
   $argMap: ();
 
-  $argKeys: null;
-  @if $type == var.$RGB or $type == var.$RGBA {
-    $argKeys: var.$RGBA;
-  } @else if $type == var.$HSL or $type == var.$HSLA {
-    $argKeys: var.$HSLA;
-  } @else {
-    @return $type;
-  }
-
-  $positional: list.zip($argKeys, $args);
+  $positional: list.zip($colorProps, $args);
   @each $k, $v in $positional {
     @if map.has-key($kwargs, $k) {
       @error '#{$k} declared twice';
