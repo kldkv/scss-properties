@@ -3,8 +3,14 @@
 @use 'var';
 @use 'utils';
 
-@function hasAlpha($colorName) {
-  @return map.get(var.$COLORS, $colorName, 'alpha');
+// returns true if any have alpha
+@function hasAlpha($colors...) {
+  @each $name in $colors {
+    @if map.get(var.$COLORS, $name, 'alpha') {
+      @return true;
+    }
+  }
+  @return false;
 }
 
 @function defaults($colorName, $properties: var.$HSL) {
