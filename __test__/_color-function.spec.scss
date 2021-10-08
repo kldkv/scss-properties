@@ -1,6 +1,6 @@
 @use '../node_modules/sass-true/sass/true' as *;
 
-@use '../index' as color-prop with (
+@use '../index' as props with (
   $POSTFIX-HUE: '-h',
   $POSTFIX-SATURATION: '-s',
   $POSTFIX-LIGHTNESS: '-l',
@@ -13,7 +13,7 @@
     @include it('defines hsla properties using hsl values') {
       @include assert {
         @include output {
-          @include color-prop.define((
+          @include props.define((
           --color: hsl(131deg, 53%, 91%)
           ));
         }
@@ -33,7 +33,7 @@
     @include it('defines hsla properties using hex values') {
       @include assert {
         @include output {
-          @include color-prop.define((
+          @include props.define((
           --color: #bf89c2
           ));
         }
@@ -53,7 +53,7 @@
     @include it('defines hsla properties using hsla values') {
       @include assert {
         @include output {
-          @include color-prop.define((
+          @include props.define((
           --color: hsla(211deg, 96%, 28%, 0.71)
           ));
         }
@@ -73,7 +73,7 @@
     @include it('defines hsla properties using hex values') {
       @include assert {
         @include output {
-          @include color-prop.define((
+          @include props.define((
           --color: #22242b9e
           ));
         }
@@ -93,7 +93,7 @@
     @include it('defines hsl properties using hsl with $forceAlpha') {
       @include assert {
         @include output {
-          @include color-prop.define((
+          @include props.define((
           --no-alpha: hsl(150deg, 93%, 17%)
           ), $forceAlpha: false);
         }
@@ -112,7 +112,7 @@
     @include it('defines hsl properties using hex with $forceAlpha') {
       @include assert {
         @include output {
-          @include color-prop.define((
+          @include props.define((
           --no-alpha: #cb2541
           ), $forceAlpha: false);
         }
@@ -131,7 +131,7 @@
     @include it('defines multiple colors') {
       @include assert {
         @include output {
-          @include color-prop.define((
+          @include props.define((
           --light: #da0,
           --dark: rgba(#040, 0.5),
           --brand: #e7d20d
@@ -167,7 +167,7 @@
     @include it('defines nested colors') {
       @include assert {
         @include output {
-          @include color-prop.define((
+          @include props.define((
           --brand: (
           color: #aaa092,
           --light: #c3bcb3,
@@ -206,74 +206,74 @@
   }
 
   .test {
-    @include color-prop.define((
+    @include props.define((
     --color: hsl(150deg, 93%, 17%)
     ));
   }
 
   @include describe('adjust') {
     @include it('adjusts red correctly') {
-      $output: color-prop.adjust(--color, $red: 74);
+      $output: props.adjust(--color, $red: 74);
       $expect: 'rgba(calc(var(--color-r) + 74), var(--color-g), var(--color-b), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('adjusts green correctly') {
-      $output: color-prop.adjust(--color, $green: -139.829);
+      $output: props.adjust(--color, $green: -139.829);
       $expect: 'rgba(var(--color-r), calc(var(--color-g) + -139.829), var(--color-b), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('adjusts blue correctly') {
-      $output: color-prop.adjust(--color, $blue: 500 * 0.14);
+      $output: props.adjust(--color, $blue: 500 * 0.14);
       $expect: 'rgba(var(--color-r), var(--color-g), calc(var(--color-b) + 70), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('adjusts hue correctly') {
-      $output: color-prop.adjust(--color, $hue: -40);
+      $output: props.adjust(--color, $hue: -40);
       $expect: 'hsla(calc(var(--color-h) + -40deg), var(--color-s), var(--color-l), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('adjusts saturation correctly') {
-      $output: color-prop.adjust(--color, $saturation: 27.4);
+      $output: props.adjust(--color, $saturation: 27.4);
       $expect: 'hsla(var(--color-h), calc(var(--color-s) + 27.4%), var(--color-l), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('adjusts lightness correctly') {
-      $output: color-prop.adjust(--color, $lightness: -74%);
+      $output: props.adjust(--color, $lightness: -74%);
       $expect: 'hsla(var(--color-h), var(--color-s), calc(var(--color-l) + -74%), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('adjusts alpha correctly') {
-      $output: color-prop.adjust(--color, $alpha: -0.294);
+      $output: props.adjust(--color, $alpha: -0.294);
       $expect: 'hsla(var(--color-h), var(--color-s), var(--color-l), calc(var(--color-a) + -0.294))';
       @include assert-equal($output, $expect);
     }
     @include it('adjusts multiple rgba values using kwargs') {
-      $output: color-prop.adjust(--color, $green: -33, $alpha: -0.4);
+      $output: props.adjust(--color, $green: -33, $alpha: -0.4);
       $expect: 'rgba(var(--color-r), calc(var(--color-g) + -33), var(--color-b), calc(var(--color-a) + -0.4))';
       @include assert-equal($output, $expect);
     }
     @include it('adjusts multiple rgba values using positional args') {
-      $output: color-prop.adjust(--color, -33, 140, 2);
+      $output: props.adjust(--color, -33, 140, 2);
       $expect: 'rgba(calc(var(--color-r) + -33), calc(var(--color-g) + 140), calc(var(--color-b) + 2), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('adjusts multiple rgba values using mixed args') {
-      $output: color-prop.adjust(--color, 59 + 1, $alpha: -0.2);
+      $output: props.adjust(--color, 59 + 1, $alpha: -0.2);
       $expect: 'rgba(calc(var(--color-r) + 60), var(--color-g), var(--color-b), calc(var(--color-a) + -0.2))';
       @include assert-equal($output, $expect);
     }
     @include it('adjusts multiple hsla values using kwargs') {
-      $output: color-prop.adjust(--color, $saturation: -33%, $alpha: -0.4);
+      $output: props.adjust(--color, $saturation: -33%, $alpha: -0.4);
       $expect: 'hsla(var(--color-h), calc(var(--color-s) + -33%), var(--color-l), calc(var(--color-a) + -0.4))';
       @include assert-equal($output, $expect);
     }
     @include it('adjusts multiple hsla values using positional args') {
-      $output: color-prop.adjust(--color, -33deg, -40%, 2%);
+      $output: props.adjust(--color, -33deg, -40%, 2%);
       $expect: 'hsla(calc(var(--color-h) + -33deg), calc(var(--color-s) + -40%), calc(var(--color-l) + 2%), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('adjusts multiple hsla values using mixed args') {
-      $output: color-prop.adjust(--color, 1deg, $alpha: -0.2);
+      $output: props.adjust(--color, 1deg, $alpha: -0.2);
       $expect: 'hsla(calc(var(--color-h) + 1deg), var(--color-s), var(--color-l), calc(var(--color-a) + -0.2))';
       @include assert-equal($output, $expect);
     }
@@ -281,67 +281,67 @@
 
   @include describe('change') {
     @include it('changes red correctly') {
-      $output: color-prop.change(--color, $red: 74);
+      $output: props.change(--color, $red: 74);
       $expect: 'rgba(74, var(--color-g), var(--color-b), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('changes green correctly') {
-      $output: color-prop.change(--color, $green: 139.829);
+      $output: props.change(--color, $green: 139.829);
       $expect: 'rgba(var(--color-r), 139.829, var(--color-b), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('changes blue correctly') {
-      $output: color-prop.change(--color, $blue: 500 * 0.14);
+      $output: props.change(--color, $blue: 500 * 0.14);
       $expect: 'rgba(var(--color-r), var(--color-g), 70, var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('changes hue correctly') {
-      $output: color-prop.change(--color, $hue: 40);
+      $output: props.change(--color, $hue: 40);
       $expect: 'hsla(40deg, var(--color-s), var(--color-l), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('changes saturation correctly') {
-      $output: color-prop.change(--color, $saturation: 27.4);
+      $output: props.change(--color, $saturation: 27.4);
       $expect: 'hsla(var(--color-h), 27.4%, var(--color-l), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('changes lightness correctly') {
-      $output: color-prop.change(--color, $lightness: 74%);
+      $output: props.change(--color, $lightness: 74%);
       $expect: 'hsla(var(--color-h), var(--color-s), 74%, var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('changes alpha correctly') {
-      $output: color-prop.change(--color, $alpha: 0.294);
+      $output: props.change(--color, $alpha: 0.294);
       $expect: 'hsla(var(--color-h), var(--color-s), var(--color-l), 0.294)';
       @include assert-equal($output, $expect);
     }
     @include it('changes multiple rgba values using kwargs') {
-      $output: color-prop.change(--color, $green: 33, $alpha: 0.4);
+      $output: props.change(--color, $green: 33, $alpha: 0.4);
       $expect: 'rgba(var(--color-r), 33, var(--color-b), 0.4)';
       @include assert-equal($output, $expect);
     }
     @include it('changes multiple rgba values using positional args') {
-      $output: color-prop.change(--color, 33, 140, 2);
+      $output: props.change(--color, 33, 140, 2);
       $expect: 'rgba(33, 140, 2, var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('changes multiple rgba values using mixed args') {
-      $output: color-prop.change(--color, 59 + 1, $alpha: 0.2);
+      $output: props.change(--color, 59 + 1, $alpha: 0.2);
       $expect: 'rgba(60, var(--color-g), var(--color-b), 0.2)';
       @include assert-equal($output, $expect);
     }
     @include it('changes multiple hsla values using kwargs') {
-      $output: color-prop.change(--color, $saturation: 33%, $alpha: 0.4);
+      $output: props.change(--color, $saturation: 33%, $alpha: 0.4);
       $expect: 'hsla(var(--color-h), 33%, var(--color-l), 0.4)';
       @include assert-equal($output, $expect);
     }
     @include it('changes multiple hsla values using positional args') {
-      $output: color-prop.change(--color, 33, 40%, 2%);
+      $output: props.change(--color, 33, 40%, 2%);
       $expect: 'hsla(33deg, 40%, 2%, var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('changes multiple hsla values using mixed args') {
-      $output: color-prop.change(--color, 1deg, $alpha: 0.2);
+      $output: props.change(--color, 1deg, $alpha: 0.2);
       $expect: 'hsla(1deg, var(--color-s), var(--color-l), 0.2)';
       @include assert-equal($output, $expect);
     }
@@ -349,69 +349,69 @@
 
   @include describe('scale') {
     @include it('scales red correctly') {
-      $output: color-prop.scale(--color, $red: 74%);
+      $output: props.scale(--color, $red: 74%);
       $expect: 'rgba(calc(var(--color-r) + ((255 - var(--color-r)) * 0.74)), var(--color-g), var(--color-b), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('scales green correctly') {
-      $output: color-prop.scale(--color, $green: -39.829%);
+      $output: props.scale(--color, $green: -39.829%);
       $expect: 'rgba(var(--color-r), calc(var(--color-g) + ((var(--color-g) - 0) * -0.39829)), var(--color-b), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('scales blue correctly') {
-      $output: color-prop.scale(--color, $blue: 500% * 0.14);
+      $output: props.scale(--color, $blue: 500% * 0.14);
       $expect: 'rgba(var(--color-r), var(--color-g), calc(var(--color-b) + ((255 - var(--color-b)) * 0.7)), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('scales hue correctly') {
-      $output: color-prop.scale(--color, $hue: -40%);
+      $output: props.scale(--color, $hue: -40%);
       $expect: 'hsla(calc(var(--color-h) + ((var(--color-h) - 0deg) * -0.4)), var(--color-s), var(--color-l), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('scales saturation correctly') {
-      $output: color-prop.scale(--color, $saturation: 27.4%);
+      $output: props.scale(--color, $saturation: 27.4%);
       $expect: 'hsla(var(--color-h), calc(var(--color-s) + ((100% - var(--color-s)) * 0.274)), var(--color-l), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('scales lightness correctly') {
-      $output: color-prop.scale(--color, $lightness: -74%);
+      $output: props.scale(--color, $lightness: -74%);
       $expect: 'hsla(var(--color-h), var(--color-s), calc(var(--color-l) + ((var(--color-l) - 0%) * -0.74)), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('scales alpha correctly') {
-      $output: color-prop.scale(--color, $alpha: 2.94%);
+      $output: props.scale(--color, $alpha: 2.94%);
       $expect: 'hsla(var(--color-h), var(--color-s), var(--color-l), calc(var(--color-a) + ((1 - var(--color-a)) * 0.0294)))';
       @include assert-equal($output, $expect);
     }
     @include it('scales multiple rgba values using kwargs') {
-      $output: color-prop.scale(--color, $green: 33%, $alpha: -4%);
+      $output: props.scale(--color, $green: 33%, $alpha: -4%);
       $expect: 'rgba(var(--color-r), calc(var(--color-g) + ((255 - var(--color-g)) * 0.33)), var(--color-b), calc(var(--color-a) + ((var(--color-a) - 0) * -0.04)))';
       @include assert-equal($output, $expect);
     }
     @include it('scales multiple rgba values using mixed args') {
-      $output: color-prop.scale(--color, 50%, $blue: -10%, $alpha: 22%);
+      $output: props.scale(--color, 50%, $blue: -10%, $alpha: 22%);
       $expect: 'rgba(calc(var(--color-r) + ((255 - var(--color-r)) * 0.5)), var(--color-g), calc(var(--color-b) + ((var(--color-b) - 0) * -0.1)), calc(var(--color-a) + ((1 - var(--color-a)) * 0.22)))';
       @include assert-equal($output, $expect);
     }
     @include it('scales multiple hsla values using kwargs') {
-      $output: color-prop.scale(--color, $saturation: 33%, $alpha: -4%);
+      $output: props.scale(--color, $saturation: 33%, $alpha: -4%);
       $expect: 'hsla(var(--color-h), calc(var(--color-s) + ((100% - var(--color-s)) * 0.33)), var(--color-l), calc(var(--color-a) + ((var(--color-a) - 0) * -0.04)))';
       @include assert-equal($output, $expect);
     }
     @include it('scales multiple hsla values using positional args') {
-      $output: color-prop.scale(--color, 33%, -40%, 2%);
+      $output: props.scale(--color, 33%, -40%, 2%);
       $expect: 'hsla(calc(var(--color-h) + ((360deg - var(--color-h)) * 0.33)), calc(var(--color-s) + ((var(--color-s) - 0%) * -0.4)), calc(var(--color-l) + ((100% - var(--color-l)) * 0.02)), var(--color-a))';
       @include assert-equal($output, $expect);
     }
     @include it('scales multiple hsla values using mixed args') {
-      $output: color-prop.scale(--color, -50%, $lightness: -20%);
+      $output: props.scale(--color, -50%, $lightness: -20%);
       $expect: 'hsla(calc(var(--color-h) + ((var(--color-h) - 0deg) * -0.5)), var(--color-s), calc(var(--color-l) + ((var(--color-l) - 0%) * -0.2)), var(--color-a))';
       @include assert-equal($output, $expect);
     }
   }
 
   .test {
-    @include color-prop.define((
+    @include props.define((
       --mix-a: teal,
       --mix-b: fuchsia
     ));
@@ -419,67 +419,67 @@
 
   @include describe('mix') {
     @include it('mixes two colors evenly') {
-      $output: color-prop.mix(--mix-a, --mix-b);
+      $output: props.mix(--mix-a, --mix-b);
       $expect: 'rgba(calc((var(--mix-a-r) * 0.5) + (var(--mix-b-r) * 0.5)), calc((var(--mix-a-g) * 0.5) + (var(--mix-b-g) * 0.5)), calc((var(--mix-a-b) * 0.5) + (var(--mix-b-b) * 0.5)), calc((var(--mix-a-a) * 0.5) + (var(--mix-b-a) * 0.5)))';
       @include assert-equal($output, $expect);
     }
     @include it('mixes two colors weighted') {
-      $output: color-prop.mix(--mix-a, --mix-b, $weight: 32.09823%);
+      $output: props.mix(--mix-a, --mix-b, $weight: 32.09823%);
       $expect: 'rgba(calc((var(--mix-a-r) * 0.3209823) + (var(--mix-b-r) * 0.6790177)), calc((var(--mix-a-g) * 0.3209823) + (var(--mix-b-g) * 0.6790177)), calc((var(--mix-a-b) * 0.3209823) + (var(--mix-b-b) * 0.6790177)), calc((var(--mix-a-a) * 0.3209823) + (var(--mix-b-a) * 0.6790177)))';
       @include assert-equal($output, $expect);
     }
     @include it('mixes two colors with red weight') {
-      $output: color-prop.mix(--mix-a, --mix-b, $red: 80%);
+      $output: props.mix(--mix-a, --mix-b, $red: 80%);
       $expect: 'rgba(calc((var(--mix-a-r) * 0.8) + (var(--mix-b-r) * 0.2)), calc((var(--mix-a-g) * 0.5) + (var(--mix-b-g) * 0.5)), calc((var(--mix-a-b) * 0.5) + (var(--mix-b-b) * 0.5)), calc((var(--mix-a-a) * 0.5) + (var(--mix-b-a) * 0.5)))';
       @include assert-equal($output, $expect);
     }
     @include it('mixes two colors with green weight') {
-      $output: color-prop.mix(--mix-a, --mix-b, $green: 100%);
+      $output: props.mix(--mix-a, --mix-b, $green: 100%);
       $expect: 'rgba(calc((var(--mix-a-r) * 0.5) + (var(--mix-b-r) * 0.5)), calc((var(--mix-a-g) * 1) + (var(--mix-b-g) * 0)), calc((var(--mix-a-b) * 0.5) + (var(--mix-b-b) * 0.5)), calc((var(--mix-a-a) * 0.5) + (var(--mix-b-a) * 0.5)))';
       @include assert-equal($output, $expect);
     }
     @include it('mixes two colors with blue weight') {
-      $output: color-prop.mix(--mix-a, --mix-b, $green: 9%);
+      $output: props.mix(--mix-a, --mix-b, $green: 9%);
       $expect: 'rgba(calc((var(--mix-a-r) * 0.5) + (var(--mix-b-r) * 0.5)), calc((var(--mix-a-g) * 0.09) + (var(--mix-b-g) * 0.91)), calc((var(--mix-a-b) * 0.5) + (var(--mix-b-b) * 0.5)), calc((var(--mix-a-a) * 0.5) + (var(--mix-b-a) * 0.5)))';
       @include assert-equal($output, $expect);
     }
     @include it('mixes two colors with hue weight') {
-      $output: color-prop.mix(--mix-a, --mix-b, $hue: 53.24%);
+      $output: props.mix(--mix-a, --mix-b, $hue: 53.24%);
       $expect: 'hsla(calc((var(--mix-a-h) * 0.5324) + (var(--mix-b-h) * 0.4676)), calc((var(--mix-a-s) * 0.5) + (var(--mix-b-s) * 0.5)), calc((var(--mix-a-l) * 0.5) + (var(--mix-b-l) * 0.5)), calc((var(--mix-a-a) * 0.5) + (var(--mix-b-a) * 0.5)))';
       @include assert-equal($output, $expect);
     }
     @include it('mixes two colors with saturation weight') {
-      $output: color-prop.mix(--mix-a, --mix-b, $saturation: 0%);
+      $output: props.mix(--mix-a, --mix-b, $saturation: 0%);
       $expect: 'hsla(calc((var(--mix-a-h) * 0.5) + (var(--mix-b-h) * 0.5)), calc((var(--mix-a-s) * 0) + (var(--mix-b-s) * 1)), calc((var(--mix-a-l) * 0.5) + (var(--mix-b-l) * 0.5)), calc((var(--mix-a-a) * 0.5) + (var(--mix-b-a) * 0.5)))';
       @include assert-equal($output, $expect);
     }
     @include it('mixes two colors with lightness weight') {
-      $output: color-prop.mix(--mix-a, --mix-b, $lightness: 12%);
+      $output: props.mix(--mix-a, --mix-b, $lightness: 12%);
       $expect: 'hsla(calc((var(--mix-a-h) * 0.5) + (var(--mix-b-h) * 0.5)), calc((var(--mix-a-s) * 0.5) + (var(--mix-b-s) * 0.5)), calc((var(--mix-a-l) * 0.12) + (var(--mix-b-l) * 0.88)), calc((var(--mix-a-a) * 0.5) + (var(--mix-b-a) * 0.5)))';
       @include assert-equal($output, $expect);
     }
     @include it('mixes two colors with alpha weight') {
-      $output: color-prop.mix(--mix-a, --mix-b, $alpha: 91%);
+      $output: props.mix(--mix-a, --mix-b, $alpha: 91%);
       $expect: 'rgba(calc((var(--mix-a-r) * 0.5) + (var(--mix-b-r) * 0.5)), calc((var(--mix-a-g) * 0.5) + (var(--mix-b-g) * 0.5)), calc((var(--mix-a-b) * 0.5) + (var(--mix-b-b) * 0.5)), calc((var(--mix-a-a) * 0.91) + (var(--mix-b-a) * 0.09)))';
       @include assert-equal($output, $expect);
     }
     @include it('mixes two colors with multiple rgb weights') {
-      $output: color-prop.mix(--mix-a, --mix-b, 60%, $red: 14%, $blue: 74.53%, $alpha: 0%);
+      $output: props.mix(--mix-a, --mix-b, 60%, $red: 14%, $blue: 74.53%, $alpha: 0%);
       $expect: 'rgba(calc((var(--mix-a-r) * 0.14) + (var(--mix-b-r) * 0.86)), calc((var(--mix-a-g) * 0.6) + (var(--mix-b-g) * 0.4)), calc((var(--mix-a-b) * 0.7453) + (var(--mix-b-b) * 0.2547)), calc((var(--mix-a-a) * 0) + (var(--mix-b-a) * 1)))';
       @include assert-equal($output, $expect);
     }
     @include it('mixes two colors with multiple hsl weights') {
-      $output: color-prop.mix(--mix-a, --mix-b, $hue: 1%, $lightness: 23%, $saturation: 48%, $alpha: 50%);
+      $output: props.mix(--mix-a, --mix-b, $hue: 1%, $lightness: 23%, $saturation: 48%, $alpha: 50%);
       $expect: 'hsla(calc((var(--mix-a-h) * 0.01) + (var(--mix-b-h) * 0.99)), calc((var(--mix-a-s) * 0.48) + (var(--mix-b-s) * 0.52)), calc((var(--mix-a-l) * 0.23) + (var(--mix-b-l) * 0.77)), calc((var(--mix-a-a) * 0.5) + (var(--mix-b-a) * 0.5)))';
       @include assert-equal($output, $expect);
     }
     @include it('mixes two colors with positional argument weights') {
-      $output: color-prop.mix(--mix-a, --mix-b, null, 14%, 60%, 74.53%, 0%);
+      $output: props.mix(--mix-a, --mix-b, null, 14%, 60%, 74.53%, 0%);
       $expect: 'rgba(calc((var(--mix-a-r) * 0.14) + (var(--mix-b-r) * 0.86)), calc((var(--mix-a-g) * 0.6) + (var(--mix-b-g) * 0.4)), calc((var(--mix-a-b) * 0.7453) + (var(--mix-b-b) * 0.2547)), calc((var(--mix-a-a) * 0) + (var(--mix-b-a) * 1)))';
       @include assert-equal($output, $expect);
     }
     @include it('mixes two colors with mixed argument weights') {
-      $output: color-prop.mix(--mix-a, --mix-b, 60%, 14%, $blue: 74.53%, $alpha: 0%);
+      $output: props.mix(--mix-a, --mix-b, 60%, 14%, $blue: 74.53%, $alpha: 0%);
       $expect: 'rgba(calc((var(--mix-a-r) * 0.14) + (var(--mix-b-r) * 0.86)), calc((var(--mix-a-g) * 0.6) + (var(--mix-b-g) * 0.4)), calc((var(--mix-a-b) * 0.7453) + (var(--mix-b-b) * 0.2547)), calc((var(--mix-a-a) * 0) + (var(--mix-b-a) * 1)))';
       @include assert-equal($output, $expect);
     }
