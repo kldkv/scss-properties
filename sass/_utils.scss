@@ -13,20 +13,6 @@
   @return var($varName);
 }
 
-@function formatArgList($colorProps, $args...) {
-  $kwargs: meta.keywords($args);
-  $argMap: ();
-
-  $positional: list.zip($colorProps, $args);
-  @each $k, $v in $positional {
-    @if map.has-key($kwargs, $k) {
-      @error '#{$k} declared twice';
-    }
-    $argMap: map.set($argMap, string.unquote($k), $v);
-  }
-  @return map.merge($argMap, $kwargs);
-}
-
 @function calcProperty($parameter, $colorName, $colorProp, $type: null) {
   $property: postfix($colorName, $colorProp);
   $unit: map.get(var.$PROPERTIES, $colorProp, 'unit');

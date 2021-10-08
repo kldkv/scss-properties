@@ -1,83 +1,10 @@
-@use '../node_modules/sass-true/sass/throw';
-@use 'sass:list';
-@use 'sass:map';
-@use 'sass:math';
-@use 'sass:meta';
+@use 'args';
 @use 'var';
 
-@function hasAlpha($args...) {
-  $kwargs: meta.keywords($args);
-  @return map.has-key($kwargs, var.$ALPHA) or list.length($args) == 4;
-}
-
-@function parseArgs($args...) {
-  $kwargs: meta.keywords($args);
-  @if list.length($args) == 0 {
-    @return null;
-  }
-
-  $hasAlpha: hasAlpha($args...);
-  $rgb: false; $hsl: false;
-
-  @each $arg in $args {
-    @if meta.type-of($arg) == 'number' {
-      @if math.is-unitless($arg) {
-        $rgb: true;
-      } @else {
-        $hsl: true;
-      }
-    }
-  }
-
-  // return hsl if *any* args have units
-  @if $hasAlpha and $hsl {
-    @return var.$HSLA;
-  } @else if $hsl {
-    @return var.$HSL;
-  } @else if $hasAlpha and $rgb {
-    @return var.$RGBA;
-  } @else if $rgb {
-    @return var.$RGB;
-  }
-
-  // return null if no args are numbers
-  @return null;
-}
-
-@function parseKwargs($args...) {
-  $kwargs: meta.keywords($args);
-  $rgb: false; $hsl: false;
-  $hasAlpha: hasAlpha($args...);
-  @each $property in map.keys($kwargs) {
-    @if list.index(var.$RGB, $property) {
-      $rgb: true;
-    } @else if list.index(var.$HSL, $property) {
-      $hsl: true;
-    }
-  }
-
-  @if $rgb and $hsl {
-    $kwarglist: list.zip(map.keys($kwargs), map.values($kwargs));
-    @return throw.error('Both RGB and HSL arguments supplied: #{$kwarglist}', 'parseKwargs()');
-  }
-
-  @if $hasAlpha and $rgb {
-    @return var.$RGBA;
-  } @else if $hasAlpha and $hsl {
-    @return var.$HSLA;
-  } @else if $rgb {
-    @return var.$RGB;
-  } @else if $hsl {
-    @return var.$HSL;
-  }
-
-  @return null;
-}
-
 @function makeColor($args...) {
-  $type: parseKwargs($args...) or parseArgs($args...);
+  $type: args.parseKwargs($args...) or args.parsePositional($args...);
   @if not $type {
-    @if hasAlpha($args...) {
+    @if args.hasAlpha($args...) {
       $type: var.$HSLA;
     } @else {
       $type: var.$HSL;

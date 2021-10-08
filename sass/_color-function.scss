@@ -4,51 +4,14 @@
 @use 'sass:math';
 @use 'sass:meta';
 @use 'var';
+@use 'args';
 @use 'utils';
 @use 'color' as sass-color;
 
-@function _compatible($value, $property, $type: null) {
-  $unit: map.get(var.$PROPERTIES, $property, 'unit');
-  $min: map.get(var.$PROPERTIES, $property, 'min');
-  $max: map.get(var.$PROPERTIES, $property, 'max');
-  @if $type == var.$SCALE or $type == var.$MIX {
-    $unit: var.$UNIT-PERCENT;
-    $min: list.nth(var.$RANGE-PERCENT, 1);
-    $max: list.nth(var.$RANGE-PERCENT, 2);
-  }
-
-  $isNumber: meta.type-of($value) == 'number';
-  $unitTest: $isNumber and math.is-unitless($value);
-  @if ($isNumber and not math.is-unitless($unit)) {
-    $unitTest: $unitTest or math.compatible($value, $unit);
-  }
-  @if ($isNumber) {
-    $allowNegative: $type and $type == var.$ADJUST or $type == var.$SCALE;
-    $rangeValue: if($allowNegative, math.abs($value), $value);
-    $unitTest: $unitTest and $min < $rangeValue and $rangeValue < $max;
-  }
-  @return meta.type-of($value) == 'string' or $unitTest;
-}
-
-@function _validate($type, $colors, $args...) {
-  $propValues: meta.keywords($args);
-  @each $colorName in $colors {
-    @if not (meta.type-of($colorName) == 'string' and map.has-key(var.$COLORS, $colorName)) {
-      @error '#{$colorName} is not a defined color.';
-    }
-  }
-  @each $prop, $value in $propValues {
-    @if $value and not _compatible($value, $prop, $type) {
-      @error 'Invalid #{$prop} value for #{$type} function: #{$value}';
-    }
-  }
-  @return true;
-}
-
 @function mix($colorName1, $colorName2, $weight: 50%, $args...) {
-  $colorType: sass-color.parseKwargs($args...) or var.$RGBA;
-  $kwargs: utils.formatArgList($colorType, $args...);
-  $valid: _validate(var.$MIX, ($colorName1, $colorName2), $weight: $weight, $kwargs...);
+  $colorType: args.parseKwargs($args...) or var.$RGBA;
+  $kwargs: args.normalize($colorType, $args...);
+  $valid: args.validate(var.$MIX, ($colorName1, $colorName2), $weight: $weight, $kwargs...);
   $ops: ();
 
   @each $property in $colorType {
@@ -61,7 +24,7 @@
 
 @function _calcProperties($colorName, $function, $args...) {
   $kwargs: meta.keywords($args);
-  $valid: _validate($function, $colorName, $kwargs...);
+  $valid: args.validate($function, $colorName, $kwargs...);
   $ops: ();
   @each $property, $value in $kwargs {
     @if $value {
@@ -84,23 +47,23 @@
 }
 
 @function _calcColor($colorName, $function, $args...) {
-  $colorType: sass-color.parseKwargs($args...);
+  $colorType: args.parseKwargs($args...);
   @if not $colorType {
     @if $function == var.$SCALE {
-      @if sass-color.hasAlpha($args...) {
+      @if args.hasAlpha($args...) {
         $colorType: var.$HSLA;
       } @else {
         $colorType: var.$HSL;
       }
     } @else {
-      $colorType: sass-color.parseArgs($args...);
+      $colorType: args.parsePositional($args...);
     }
   }
   $colorType: $colorType or var.$HSL;
   @if list.length($colorType) == 3 and _hasAlpha($colorName) {
     $colorType: list.append($colorType, var.$ALPHA);
   }
-  $kwargs: utils.formatArgList($colorType, $args...);
+  $kwargs: args.normalize($colorType, $args...);
   $properties: _calcProperties($colorName, $function, $kwargs...);
   $defaults: _defaults($colorName, $colorType);
   $properties: map.merge($defaults, $properties);
@@ -139,13 +102,13 @@
   @if $type == 'mix' {
     $colorName2: list.nth($settings, 1); // allow map as well
     $weight: list.nth($settings, 2) or 50%;
-    $valid: _validate(var.$MIX, ($colorName, $colorName2), $weight: $weight);
+    $valid: args.validate(var.$MIX, ($colorName, $colorName2), $weight: $weight);
     $invert: $property == var.$HUE and _invertHue($colorName, $colorName2);
     // invert option
     @return utils.calcMix($colorName, $colorName2, $weight, $property, $modify: $invert and -360deg);
   } @else {
     $param: list.nth($settings, 1);
-    $valid: _validate($type, $colorName, (#{$property}: $param)...);
+    $valid: args.validate($type, $colorName, (#{$property}: $param)...);
     @return utils.calcProperty($param, $colorName, $property, $type);
   }
 }
