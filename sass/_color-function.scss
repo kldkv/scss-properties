@@ -26,19 +26,6 @@
   @return $colorType;
 }
 
-@function mix($colorName1, $colorName2, $weight: 50%, $args...) {
-  $colorType: _getColorType(var.$MIX, ($colorName1 $colorName2), $weight: $weight, $args...);
-  $kwargs: args.normalize($colorType, $args...);
-  $ops: ();
-
-  @each $property in $colorType {
-    $w: map.get($kwargs, $property) or $weight;
-    $ops: map.set($ops, $property, utils.calcMix($colorName1, $colorName2, $w, $property));
-  }
-
-  @return clr.makeColor($ops...);
-}
-
 @function _calcProperties($function, $colorName, $args...) {
   $kwargs: meta.keywords($args);
   $ops: ();
@@ -70,6 +57,17 @@
 @function scale($colorName, $args...) {
   @return _calcColor(var.$SCALE, $colorName, $args...);
 };
+
+@function mix($colorName1, $colorName2, $weight: 50%, $args...) {
+  $colorType: _getColorType(var.$MIX, ($colorName1 $colorName2), $weight: $weight, $args...);
+  $kwargs: args.normalize($colorType, $args...);
+  $ops: ();
+  @each $property in $colorType {
+    $w: map.get($kwargs, $property) or $weight;
+    $ops: map.set($ops, $property, utils.calcMix($colorName1, $colorName2, $w, $property));
+  }
+  @return clr.makeColor($ops...);
+}
 
 @function _parseSetArg($arg) {
   $property: map.has-key(var.$PROPERTIES, $arg) and $arg;
