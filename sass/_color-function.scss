@@ -9,14 +9,20 @@
 
 @function _compatible($value, $property, $type: null) {
   $unit: map.get(var.$PROPERTIES, $property, 'unit');
+  $min: map.get(var.$PROPERTIES, $property, 'min');
+  $max: map.get(var.$PROPERTIES, $property, 'max');
+  @if $type == var.$SCALE or $type == var.$MIX {
+    $unit: var.$UNIT-PERCENT;
+    $min: list.nth(var.$RANGE-PERCENT, 1);
+    $max: list.nth(var.$RANGE-PERCENT, 2);
+  }
+
   $isNumber: meta.type-of($value) == 'number';
   $unitTest: $isNumber and math.is-unitless($value);
   @if ($isNumber and not math.is-unitless($unit)) {
     $unitTest: $unitTest or math.compatible($value, $unit);
   }
   @if ($isNumber) {
-    $min: map.get(var.$PROPERTIES, $property, 'min');
-    $max: map.get(var.$PROPERTIES, $property, 'max');
     $allowNegative: $type and $type == var.$ADJUST or $type == var.$SCALE;
     $rangeValue: if($allowNegative, math.abs($value), $value);
     $unitTest: $unitTest and $min < $rangeValue and $rangeValue < $max;
