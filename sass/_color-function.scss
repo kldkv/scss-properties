@@ -87,7 +87,11 @@
   $colorType: sass-color.parseKwargs($args...);
   @if not $colorType {
     @if $function == var.$SCALE {
-      $colorType: var.$HSL;
+      @if sass-color.hasAlpha($args...) {
+        $colorType: var.$HSLA;
+      } @else {
+        $colorType: var.$HSL;
+      }
     } @else {
       $colorType: sass-color.parseArgs($args...);
     }

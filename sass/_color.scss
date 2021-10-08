@@ -5,13 +5,18 @@
 @use 'sass:meta';
 @use 'var';
 
+@function hasAlpha($args...) {
+  $kwargs: meta.keywords($args);
+  @return map.has-key($kwargs, var.$ALPHA) or list.length($args) == 4;
+}
+
 @function parseArgs($args...) {
   $kwargs: meta.keywords($args);
   @if list.length($args) == 0 {
     @return null;
   }
 
-  $hasAlpha: map.has-key($kwargs, 'alpha') or list.length($args) == 4;
+  $hasAlpha: hasAlpha($args...);
   $rgb: false; $hsl: false;
 
   @each $arg in $args {
@@ -42,7 +47,7 @@
 @function parseKwargs($args...) {
   $kwargs: meta.keywords($args);
   $rgb: false; $hsl: false;
-  $hasAlpha: map.has-key($kwargs, 'alpha');
+  $hasAlpha: hasAlpha($args...);
   @each $property in map.keys($kwargs) {
     @if list.index(var.$RGB, $property) {
       $rgb: true;
@@ -72,8 +77,7 @@
 @function makeColor($args...) {
   $type: parseKwargs($args...) or parseArgs($args...);
   @if not $type {
-    $kwargs: meta.keywords($args);
-    @if map.has-key($kwargs, 'alpha') or list.length($args) == 4 {
+    @if hasAlpha($args...) {
       $type: var.$HSLA;
     } @else {
       $type: var.$HSL;
