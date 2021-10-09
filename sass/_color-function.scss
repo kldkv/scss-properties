@@ -25,7 +25,7 @@
   @return $colorType;
 }
 
-@function _calcProperties($function, $colorName, $args...) {
+@function _setProperties($function, $colorName, $args...) {
   $kwargs: meta.keywords($args);
   $ops: ();
   @each $property, $value in $kwargs {
@@ -42,25 +42,25 @@
   @return $ops;
 }
 
-@function _calcColor($function, $colorName, $args...) {
+@function _makeColor($function, $colorName, $args...) {
   $colorType: _getColorType($function, $colorName, $args...);
   $kwargs: args.normalize($colorType, $args...);
-  $properties: _calcProperties($function, $colorName, $kwargs...);
   $defaults: clr.defaults($colorName, $colorType);
+  $properties: _setProperties($function, $colorName, $kwargs...);
   $properties: map.merge($defaults, $properties);
   @return clr.makeColor($properties...);
 }
 
 @function adjust($colorName, $args...) {
-  @return _calcColor(var.$ADJUST, $colorName, $args...);
+  @return _makeColor(var.$ADJUST, $colorName, $args...);
 }
 
 @function change($colorName, $args...) {
-  @return _calcColor(var.$CHANGE, $colorName, $args...);
+  @return _makeColor(var.$CHANGE, $colorName, $args...);
 };
 
 @function scale($colorName, $args...) {
-  @return _calcColor(var.$SCALE, $colorName, $args...);
+  @return _makeColor(var.$SCALE, $colorName, $args...);
 };
 
 @function mix($colorName1, $colorName2, $weight: 50%, $args...) {
@@ -118,7 +118,7 @@
   $colorProps: clr.defaults($colorName, $colorType);
 
   @each $function, $propValues in $ops {
-    $newProps: _calcProperties($function, $colorName, $propValues...);
+    $newProps: _setProperties($function, $colorName, $propValues...);
     $colorProps: map.merge($colorProps, $newProps);
   }
 
