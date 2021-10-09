@@ -1,9 +1,0 @@
-@use 'sass:math';
-
-@function flip($first, $second) {
-  @if (math.round(math.random()) == 1) {
-    @return $first;
-  }
-
-  @return $second;
-}

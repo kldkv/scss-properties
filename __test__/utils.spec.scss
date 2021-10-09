@@ -4,65 +4,8 @@
 @use 'sass:meta';
 @use 'sass:string';
 @use 'var';
-@use 'utils' as test-utils;
 @use '../sass/utils';
 
 @include describe('utils') {
-  @include it('Correct convert to value to unit') {
-    $units: (
-      '%': 0%,
-      'ch': 0ch,
-      'cm': 0cm,
-      'deg': 0deg,
-      'em': 0em,
-      'ex': 0ex,
-      'grad': 0grad,
-      'Hz': 0Hz,
-      'in': 0in,
-      'kHz': 0kHz,
-      'mm': 0mm,
-      'ms': 0ms,
-      'pc': 0pc,
-      'pt': 0pt,
-      'px': 0px,
-      'q': 0q,
-      'rad': 0rad,
-      'rem': 0rem,
-      's': 0s,
-      'turn': 0turn,
-      'vh': 0vh,
-      'vmax': 0vmax,
-      'vmin': 0vmin,
-      'vw': 0vw,
-    );
-    
-    @each $key, $zero-unit in $units {
-      $r: math.random($limit: var.$MAX-INTEGER);
-      $value: test-utils.flip($r, -$r);
-
-      @include assert-equal(utils.to-unit($value, $key), $value + $zero-unit);
-    }
-  };
-
-  @include it('Correct convert to number') {
-    @for $var from 1 to 10 {
-      $r: math.random($limit: var.$MAX-INTEGER);
-      $float: test-utils.flip($r + random(), $r);
-      $value: test-utils.flip($float, -$float);
-  
-      // $string: meta.inspect($value);
-      $string: '#{$value}';
-
-      @include assert-equal(utils.to-number($string), $value, $inspect: true);
-    }
-  };
-
-  @include it('Correct string replace') {
-    $s: 'var(--brand-color)';
-    $s-exp: '--brand-color)';
-    $s-exp-exp: '--brand-color';
-
-    @include assert-equal(utils.str-replace($s, 'var('), $s-exp);
-    @include assert-equal(utils.str-replace($s-exp, ')'), $s-exp-exp);
-  }
+  // to-do
 }
