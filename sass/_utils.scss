@@ -16,8 +16,8 @@
 }
 
 // return a modified color property, based on function type
-@function calcProperty($parameter, $colorName, $colorProp, $type: null) {
-  $valid: args.validate($type, $colorProp, $parameter);
+@function calcProperty($function, $colorName, $colorProp, $parameter) {
+  $valid: args.validate($function, $colorProp, $parameter);
   $property: postfix($colorName, $colorProp);
   $unit: map.get(var.$PROPERTIES, $colorProp, 'unit');
   $min: map.get(var.$PROPERTIES, $colorProp, 'min');
@@ -33,37 +33,37 @@
 
   $propIsNumber: meta.type-of($property) == 'number';
   $paramIsNumber: meta.type-of($parameter) == 'number';
-  $param: if($paramIsNumber and math.is-unitless($parameter), $parameter * $unit, $parameter);
+  $value: if($paramIsNumber and math.is-unitless($parameter), $parameter * $unit, $parameter);
 
-  @if ($type == var.$ADJUST) {
+  @if ($function == var.$ADJUST) {
     // add or subtract parameter from existing value
     @if $propIsNumber and $paramIsNumber {
-      @return math.clamp($min, $property + $param, $max);
-    } @else if ($param) {
-      @return calc(#{$property} + #{$param});
+      @return math.clamp($min, $property + $value, $max);
+    } @else if ($value) {
+      @return calc(#{$property} + #{$value});
     }
     @return $property;
   }
 
-  @if ($type == var.$CHANGE) {
+  @if ($function == var.$CHANGE) {
     // replace existing value with parameter
-    @if ($param) {
-      @return $param;
+    @if ($value) {
+      @return $value;
     }
     @return $property;
   }
 
-  @if ($type == var.$SCALE) {
+  @if ($function == var.$SCALE) {
     // scale existing value relative to its min or max
     @if $propIsNumber and $paramIsNumber {
-      @return math.clamp($min, $property + math.div($param, 100%), $max);
-    } @else if ($param) {
-      // if $param is greater than 0, use difference from max. if less than 0, use min
-      $adjust: 'max(#{$max} * max(0, #{$param}) / #{$param}, #{$property}) - max(#{$property} * max(0, #{$param}) / #{$param}, #{$min})';
-      $adjust: '(#{$adjust}) * #{$param}';
+      @return math.clamp($min, $property + math.div($value, 100%), $max);
+    } @else if ($value) {
+      // if $value is greater than 0, use difference from max. if less than 0, use min
+      $adjust: 'max(#{$max} * max(0, #{$value}) / #{$value}, #{$property}) - max(#{$property} * max(0, #{$value}) / #{$value}, #{$min})';
+      $adjust: '(#{$adjust}) * #{$value}';
       @if ($paramIsNumber) {
-        // simplify css output if $param is a number
-        $percentile: if($paramIsNumber, math.div($param, 100%), $param);
+        // simplify css output if $value is a number
+        $percentile: if($paramIsNumber, math.div($value, 100%), $value);
         $adjust: if($percentile > 0,
           '#{$max} - #{$property}',
           '#{$property} - #{$min}');
@@ -79,7 +79,7 @@
 }
 
 // return a weighted mix of a single color property using css properties
-@function calcMix($colorName1, $colorName2, $weight, $colorProp, $modify: null) {
+@function calcMix($colorProp, $colorName1, $colorName2, $weight, $modify: null) {
   $valid: args.validate(var.$MIX, $colorProp, $weight);
   $var1: postfix($colorName1, $colorProp);
   $var2: postfix($colorName2, $colorProp);

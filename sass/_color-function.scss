@@ -34,9 +34,9 @@
     @if $value {
       $newOp: null;
       @if $function == var.$MIX {
-        $newOp: utils.calcMix($colorName, $value..., $colorProp: $property);
+        $newOp: utils.calcMix($property, $colorName, $value...);
       } @else {
-        $newOp: utils.calcProperty($value, $colorName, $property, $function);
+        $newOp: utils.calcProperty($function, $colorName, $property, $value);
       }
       $ops: map.set($ops, $property, $newOp);
     }
@@ -76,7 +76,7 @@
   $ops: ();
   @each $property in $colorType {
     $w: map.get($kwargs, $property) or $weight;
-    $ops: map.set($ops, $property, utils.calcMix($colorName1, $colorName2, $w, $property));
+    $ops: map.set($ops, $property, utils.calcMix($property, $colorName1, $colorName2, $w));
   }
   @return clr.makeColor($ops...);
 }
