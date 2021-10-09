@@ -76,60 +76,161 @@ This is true by default because that behavior is most consistent. Even with `FOR
 
 ## Color functions
 
-```scss
-$brand: hsl(200, 56%, 33%);
+This project provides several functions for manipulating the color attributes of css properties. Most of these functions mimic the API and behavior of [sass color functions](https://sass-lang.com/documentation/modules/color), minus support for `$whiteness` and `$blackness` arguments.
 
+### Adjust
+
+The 'adjust' function adds or subtracts a fixed amount from a color property.
+
+```scss
 :root {
-  @include color\define((
-    --brand: $brand,
+  @include prop.define((
+    --brand: hsl(200, 56%, 33%),
   ));
 
-  --brand-dark: #{color\adjust(--brand, $brand, $saturation: -20)};
-  --brand-funny: #{color\adjust(--brand, $brand, $hue: 50, $saturation: 16, $lightness: 4, $alpha: -10%)};
-
-  --brand-new: #{color\change(--brand, $brand, $hue: 50)};
-  --brand-new-08: #{color\change(--brand, $brand, $hue: 50, $alpha: 0.8)};
+  --brand-red: #{prop.adjust(--brand, $blue: -20)};
+  --brand-funny: #{prop.adjust(--brand, $hue: 50deg, $saturation: 16%, $lightness: 4%, $alpha: -0.1)};
 }
 ```
-compile to
+
+compiles to
+
 ```css
 :root {
-  // color\define
-  --brand: hsl(var(--brand-h), var(--brand-s), var(--brand-l));
-  --brand-h: 200deg;
-  --brand-s: 56%;
-  --brand-l: 33%;
+  /* property definitions... */
 
-  // color\adust
-  --brand-dark: hsl(var(--brand-h), calc(var(--brand-s) + -20%), var(--brand-l));
-  --brand-funny: hsla(calc(var(--brand-h) + 50deg), calc(var(--brand-s) + 16%), calc(var(--brand-l) + 4%), calc(var(--brand-a) * 0.9));
-
-  // color\change
-  --brand-new: hsl(50deg, var(--brand-s), var(--brand-l));
-  --brand-new-08: hsla(50deg, var(--brand-s), var(--brand-l), 0.8);
+  --brand-red: rgba(var(--brand-r), var(--brand-g), calc(var(--brand-b) + -20), var(--brand-a));;
+  --brand-funny: hsla(calc(var(--brand-h) + 50deg), calc(var(--brand-s) + 16%), calc(var(--brand-l) + 4%), calc(var(--brand-a) + -0.1));
 }
 ```
 
-And mix its
+### Change
+
+The change function sets one or more color properties to new values. 
+
 ```scss
-$brand: hsl(200, 56%, 33%);
-
 :root {
-  @include color\define((
-    --brand: (
-      color: $brand,
-      --dark: #{color\adjust(--brand, $brand, $saturation: -20)}
-    ),
+  @include prop.define((
+    --brand: hsl(200, 56%, 33%),
   ));
+
+  --brand-dark: #{prop.change(--brand, $saturation: 50%, $lightness: 25%)};
 }
 ```
-compile to
+
+compiles to
+
 ```css
 :root {
-  --brand: hsl(var(--brand-h), var(--brand-s), var(--brand-l));
-  --brand-h: 200deg;
-  --brand-s: 56%;
-  --brand-l: 33%;
-  --brand--dark: hsl(var(--brand-h), calc(var(--brand-s) + -20%), var(--brand-l));
+  /* property definitions... */
+
+  --brand-dark: hsla(var(--brand-h), 50%, 25%, var(--brand-a));
+}
+```
+
+### Scale
+
+Scales one or more properties by a percentage towards their minimum or maximum values.
+
+```scss
+:root {
+  @include prop.define((
+    --brand: hsl(200, 56%, 33%),
+  ));
+
+  --brand-dark: #{prop.scale(--brand, $lightness: -50%)};
+  --brand-green: #{prop.scale(--brand, $green: 70%)};
+}
+```
+
+compiles to
+
+```css
+:root {
+  /* property definitions... */
+
+  --brand-dark: hsla(var(--brand-h), var(--brand-s), calc(var(--brand-l) + ((var(--brand-l) - 0%) * -0.5)), var(--brand-a));
+  --brand-green: rgba(var(--brand-r), calc(var(--brand-g) + ((255 - var(--brand-g)) * 0.7)), var(--brand-b), var(--brand-a));
+}
+```
+
+### Mix
+
+Mix two colors together by a set amount.
+
+```scss
+:root {
+  @include prop.define((
+    --color-a: teal,
+    --color-b: fuchsia
+  ));
+
+  --mix: #{prop.mix(--color-a, --color-b)};
+  --mix-w: #{prop.mix(--mix-a, --mix-b, $weight: 32%)};
+}
+```
+
+compiles to
+
+```css
+:root {
+  /* property definitions... */
+
+  --mix: rgba(calc((var(--color-a-r) * 0.5) + (var(--color-b-r) * 0.5)), calc((var(--color-a-g) * 0.5) + (var(--color-b-g) * 0.5)), calc((var(--color-a-b) * 0.5) + (var(--color-b-b) * 0.5)), calc((var(--color-a-a) * 0.5) + (var(--color-b-a) * 0.5)));
+  --mix-w: rgba(calc((var(--color-a-r) * 0.32) + (var(--color-b-r) * 0.68)), calc((var(--color-a-g) * 0.32) + (var(--color-b-g) * 0.68)), calc((var(--color-a-b) * 0.32) + (var(--color-b-b) * 0.68)), calc((var(--color-a-a) * 0.32) + (var(--color-b-a) * 0.68)))
+}
+```
+
+The mix function defaults to rgba mixing, since averaging hues often produces unpredictable results.
+
+You can also set individual weights for hsla and rgba properties, on top of a default weight.
+
+```scss
+:root {
+  /* property declaration... */
+
+  --mix: #{prop.mix(--color-a, --color-b, $lightness: 25%, $saturation: 70%)};
+}
+```
+
+compiles to
+
+```css
+:root {
+  /* property definitions... */
+
+  --mix: hsla(calc((var(--color-a-h) * 0.5) + (var(--color-b-h) * 0.5)), calc((var(--color-a-s) * 0.7) + (var(--color-b-s) * 0.3)), calc((var(--color-a-l) * 0.25) + (var(--color-b-l) * 0.75)), calc((var(--color-a-a) * 0.5) + (var(--color-b-a) * 0.5)))
+}
+```
+
+### Set
+
+The set function allows you to combine different color functions to manipulate different attributes of a color at once. It defines these manipulations using keyword arguments and either maps or lists, where the key or first value corresponds to a function/color property, and the rest to the function arguments.
+
+```scss
+:root {
+  /* property declaration... */
+
+  --set: #{props.set(--mix-a,
+    $lightness: change 50%,
+    $saturation: scale -50%,
+    $alpha: change 1)};
+  --mix: #{props.set(--mix-a,
+    $adjust: alpha -0.4,
+    $mix: (
+      red: --mix-b 30%,
+      green: --mix-b 100%,
+      blue: --mix-b 60% ))};
+}
+```
+
+compiles to
+
+```css
+:root {
+  /* property definitions... */
+
+  --set: rgba(calc((var(--mix-a-r) * 0.3) + (var(--mix-b-r) * 0.7)), calc((var(--mix-a-g) * 1) + (var(--mix-b-g) * 0)), calc((var(--mix-a-b) * 0.6) + (var(--mix-b-b) * 0.4)), calc(var(--mix-a-a) + -0.4));
+  --mix: hsla(var(--mix-a-h), calc(var(--mix-a-s) + ((var(--mix-a-s) - 0%) * -0.5)), 50%, 1);
 }
 ```
