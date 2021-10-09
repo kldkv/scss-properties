@@ -3,7 +3,8 @@
 @use 'var';
 @use 'utils';
 
-// returns true if any have alpha
+// returns true if any colors were defined with alpha values
+// consider throwing error if colors are not defined
 @function hasAlpha($colors...) {
   @each $name in $colors {
     @if map.get(var.$DEFINED, $name, 'alpha') {
@@ -13,6 +14,8 @@
   @return false;
 }
 
+// returns a map of default values based on color properties
+// mostly this looks like: (red: var(--color-r)), etc...
 @function defaults($colorName, $properties: var.$HSL) {
   $ops: ();
   @each $property in $properties {
@@ -21,6 +24,7 @@
   @return $ops;
 }
 
+// return a css color based on a variable arguments list of property values
 @function makeColor($args...) {
   $type: args.parseKwargs($args...) or args.parsePositional($args...);
   @if not $type {

@@ -8,6 +8,7 @@
 @use 'utils';
 @use 'color' as clr;
 
+// returns properties for color output based on function, arguments, and color name
 @function _getColorType($function, $colors, $args...) {
   $colorType: args.parseKwargs($args...);
   @if not $colorType {
@@ -25,6 +26,7 @@
   @return $colorType;
 }
 
+// returns a map of property names and css color values based on kwargs
 @function _setProperties($function, $colorName, $args...) {
   $kwargs: meta.keywords($args);
   $ops: ();
@@ -42,6 +44,8 @@
   @return $ops;
 }
 
+// returns a color calculated from css properties
+// using the function type, color name, and a variable arguments list
 @function _makeColor($function, $colorName, $args...) {
   $colorType: _getColorType($function, $colorName, $args...);
   $kwargs: args.normalize($colorType, $args...);
@@ -51,6 +55,7 @@
   @return clr.makeColor($properties...);
 }
 
+// accessible alias functions for invoking _makeColor
 @function adjust($colorName, $args...) {
   @return _makeColor(var.$ADJUST, $colorName, $args...);
 }
@@ -63,6 +68,8 @@
   @return _makeColor(var.$SCALE, $colorName, $args...);
 };
 
+// returns a color calculated by mixing css properties
+// defaults to rgb unless hsl properties are specified in kwargs
 @function mix($colorName1, $colorName2, $weight: 50%, $args...) {
   $colorType: _getColorType(var.$MIX, ($colorName1 $colorName2), $weight: $weight, $args...);
   $kwargs: args.normalize($colorType, $args...);
@@ -74,6 +81,8 @@
   @return clr.makeColor($ops...);
 }
 
+// parses an argument for the set() function as
+// either a function or property identifier
 @function _parseSetArg($arg) {
   $arg: #{$arg};
   $function: list.index(var.$FUNCTIONS, $arg) and $arg;
@@ -84,14 +93,18 @@
   @return $function, $property;
 }
 
+// takes a variable arguments map to return a css color using
+// a mix of the above methods for manipulating color values
 @function set($colorName, $argList...) {
-  $setMap: meta.keywords($argList);
+  $kwargs: meta.keywords($argList);
 
   $ops: ();
   $args: ();
-  @each $key1, $value in $setMap {
+  @each $key1, $value in $kwargs {
+    // parse kwargs with either function or property name as first value
     $arg1: _parseSetArg($key1);
     @if meta.type-of($value) == 'list' and meta.type-of(list.nth($value, 1) != 'list') {
+      // in order to allow second values to be supplied as a list
       $settings: ();
       @for $i from 2 through list.length($value) {
         $settings: list.append($settings, list.nth($value, $i));
@@ -103,7 +116,7 @@
       $function: list.nth($arg1, 1) or list.nth($arg2, 1);
       $property: list.nth($arg1, 2) or list.nth($arg2, 2);
       @if list.length($settings) == 1 {
-        $settings: list.nth($settings, 1);
+        $settings: list.nth($settings, 1); // otherwise functions can't identify argument type
       }
       $ops: map.set($ops, $function, $property, $settings);
       $args: map.set($args, $property, $settings);
@@ -125,6 +138,8 @@
   @return clr.makeColor($colorProps...);
 }
 
+// defines separate css properties for each color property, to allow manipulation
+// also saves whether the color has an alpha value, to pick smart color outputs
 @mixin define($colorMap, $parent: '', $forceAlpha: var.$FORCE-ALPHA) {
   @if (meta.type-of($colorMap) == 'map') {
     @each $colorName in map.keys($colorMap) {
@@ -138,7 +153,7 @@
   
       $isColor: meta.type-of($color) == 'color';
       $isMap: meta.type-of($color) == 'map';
-      $priorAlpha: clr.hasAlpha($colorName);
+      $priorAlpha: clr.hasAlpha($colorName); // if a previously defined alpha color shares the same name, alpha must be true
       $isAlpha: $forceAlpha or $priorAlpha or ($isColor and color.alpha($color) != 1);
   
       @if ($isMap) {
@@ -152,6 +167,7 @@
         $name-l: #{$name}#{var.$POSTFIX-LIGHTNESS};
         $name-a: #{$name}#{var.$POSTFIX-ALPHA};
   
+        // use hsl values to control color (to-do: allow rgb through a setting)
         $type: if($isAlpha, var.$HSLA, var.$HSL);
         $defaults: clr.defaults($name, $type);
   

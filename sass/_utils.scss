@@ -7,12 +7,15 @@
 @use 'args';
 @use 'var';
 
+// return a postfixed css property
+// --color + 'hue' = var(--color-h)
 @function postfix($colorName, $colorProp) {
   $postfix: map.get(var.$PROPERTIES, $colorProp, 'postfix');
   $varName: #{$colorName}#{$postfix};
   @return var($varName);
 }
 
+// return a modified color property, based on function type
 @function calcProperty($parameter, $colorName, $colorProp, $type: null) {
   $valid: args.validate($type, $colorProp, $parameter);
   $property: postfix($colorName, $colorProp);
@@ -75,6 +78,7 @@
   @return null;
 }
 
+// return a weighted mix of a single color property using css properties
 @function calcMix($colorName1, $colorName2, $weight, $colorProp, $modify: null) {
   $valid: args.validate(var.$MIX, $colorProp, $weight);
   $var1: postfix($colorName1, $colorProp);
