@@ -19,9 +19,9 @@
   $argMap: ();
 
   $argKeys: null;
-  @if $type == 'rgb' or $type == 'rgba' {
+  @if $type == var.$RGB or $type == var.$RGBA {
     $argKeys: var.$RGBA;
-  } @else if $type == 'hsl' or $type == 'hsla' {
+  } @else if $type == var.$HSL or $type == var.$HSLA {
     $argKeys: var.$HSLA;
   } @else {
     @return $type;

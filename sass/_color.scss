@@ -36,13 +36,13 @@
   }
 
   @if $hasAlpha and $rgb {
-    @return 'rgba';
+    @return var.$RGBA;
   } @else if $hasAlpha and $hsl {
-    @return 'hsla';
+    @return var.$HSLA;
   } @else if $rgb {
-    @return 'rgb';
+    @return var.$RGB;
   } @else if $hsl {
-    @return 'hsl';
+    @return var.$HSL;
   }
 
   @return null;
@@ -50,13 +50,13 @@
 
 @function makeColor($args...) {
   $type: guessColor($args...);
-  @if $type == 'rgba' {
+  @if $type == var.$RGBA {
     @return rgba($args...);
-  } @else if $type == 'rgb' {
+  } @else if $type == var.$RGB {
     @return rgb($args...);
-  } @else if $type == 'hsla' {
+  } @else if $type == var.$HSLA {
     @return hsla($args...);
-  } @else if $type == 'hsl' {
+  } @else if $type == var.$HSL {
     @return hsl($args...);
   }
 

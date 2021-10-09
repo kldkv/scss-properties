@@ -38,12 +38,6 @@
   @return true;
 }
 
-@function _invertHue($colorName1, $colorName2) {
-  $color1: map.get(var.$COLORS, $colorName1, 'color');
-  $color2: map.get(var.$COLORS, $colorName2, 'color');
-  @return math.abs(color.hue($color1) - color.hue($color2)) > 180deg;
-}
-
 @function mix($colorName1, $colorName2, $weight: 50%, $red: null, $green: null, $blue: null, $alpha: null) {
   @return sass-color.makeColor(
     $red:   utils.calcMix($colorName1, $colorName2, $red or $weight, var.$RED),
