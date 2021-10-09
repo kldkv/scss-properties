@@ -18,14 +18,15 @@ Color properties must be declared using the `define` mixin, which produces a sep
   ));
 
   /* output:
-  --brand: hsla(var(--brand-h), var(--brand-s), var(--brand-l), var(--brand-a));
-  --brand-r: 37;
-  --brand-g: 100;
-  --brand-b: 131;
-  --brand-h: 199.7872340426deg;
-  --brand-s: 55.9523809524%;
-  --brand-l: 32.9411764706%;
-  --brand-a: 1; */
+    --brand: hsla(var(--brand-h), var(--brand-s), var(--brand-l), var(--brand-a));
+    --brand-r: 37;
+    --brand-g: 100;
+    --brand-b: 131;
+    --brand-h: 199.7872340426deg;
+    --brand-s: 55.9523809524%;
+    --brand-l: 32.9411764706%;
+    --brand-a: 1;
+  */
 }
 ```
 
@@ -41,20 +42,21 @@ You can also nest define variables.
   ), $forceAlpha: false);
 
   /* output:
-  --brand: hsl(var(--brand-h), var(--brand-s), var(--brand-l));
-  --brand-r: 37;
-  --brand-g: 100;
-  --brand-b: 131;
-  --brand-h: 200deg;
-  --brand-s: 56%;
-  --brand-l: 33%;
-  --brand--green: hsl(var(--brand--green-h), var(--brand--green-s), var(--brand--green-l));
-  --brand--green-r: 0;
-  --brand--green-g: 128;
-  --brand--green-b: 0;
-  --brand--green-h: 120deg;
-  --brand--green-s: 100%;
-  --brand--green-l: 25.0980392157%; */
+    --brand: hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+    --brand-r: 37;
+    --brand-g: 100;
+    --brand-b: 131;
+    --brand-h: 200deg;
+    --brand-s: 56%;
+    --brand-l: 33%;
+    --brand--green: hsl(var(--brand--green-h), var(--brand--green-s), var(--brand--green-l));
+    --brand--green-r: 0;
+    --brand--green-g: 128;
+    --brand--green-b: 0;
+    --brand--green-h: 120deg;
+    --brand--green-s: 100%;
+    --brand--green-l: 25.0980392157%;
+  */
 }
 ```
 
@@ -64,7 +66,7 @@ If you want to prevent opaque hsl or rgb colors from outputting as hsla or rgba,
 @use 'scss-properties/index' as prop with ($FORCE-ALPHA: false);
 ```
 
-This is true by default because that behavior is most consistent. Even with `$FORCE-ALPHA` set to false, hsl colors will sometimes output hsla properties: for example, if they share a name with a previously-defined, semi-transparent color.
+This is true by default because it's safest to assume hsla output if _any_ semi-transparent colors are used. Even with `$FORCE-ALPHA` set to false, hsl colors will sometimes output hsla properties: for example, if they share a name with a previously-defined, semi-transparent color.
 
 ## Color functions
 
@@ -77,11 +79,12 @@ The 'adjust' function adds or subtracts a fixed amount from a color property.
 ```scss
 .example {
   --brand-red: #{prop.adjust(--brand, $blue: -20)};
-  --brand-funny: #{prop.adjust(--brand, $hue: 50deg, $saturation: 16%, $lightness: 4%, $alpha: -0.1)};
+  --brand-funny: #{prop.adjust(--brand, $hue: 50deg, $saturation: 16%, $alpha: -0.1)};
 
   /* output:
-  --brand-red: rgba(var(--brand-r), var(--brand-g), calc(var(--brand-b) + -20), var(--brand-a));;
-  --brand-funny: hsla(calc(var(--brand-h) + 50deg), calc(var(--brand-s) + 16%), calc(var(--brand-l) + 4%), calc(var(--brand-a) + -0.1)); */
+    --brand-red: rgba(... calc(var(--brand-b) + -20), ...);;
+    --brand-funny: hsla(calc(var(--brand-h) + 50deg), calc(var(--brand-s) + 16%), var(--brand-l), calc(var(--brand-a) + -0.1));
+  */
 }
 ```
 
@@ -105,17 +108,10 @@ Scales one or more properties by a percentage towards their minimum or maximum v
   --brand-dark: #{prop.scale(--brand, $lightness: -50%)};
   --brand-green: #{prop.scale(--brand, $green: 70%)};
 
-  /* 
-  --brand-dark: hsla(
-      var(--brand-h),
-      var(--brand-s),
-      calc(var(--brand-l) + ((var(--brand-l) - 0%) * -0.5)),
-      var(--brand-a));
-  --brand-green: rgba(
-      var(--brand-r),
-      calc(var(--brand-g) + ((255 - var(--brand-g)) * 0.7)),
-      var(--brand-b),
-      var(--brand-a)); */
+  /* output:
+    --brand-dark: hsla(... calc(var(--brand-l) + ((var(--brand-l) - 0%) * -0.5)), ...);
+    --brand-green: rgba(... calc(var(--brand-g) + ((255 - var(--brand-g)) * 0.7)), ...);
+  */
 }
 ```
 
@@ -133,9 +129,10 @@ Mix two colors together by a set amount.
   --mix: #{prop.mix(--color-a, --color-b)};
   --mix-w: #{prop.mix(--mix-a, --mix-b, $weight: 32%)};
   
-  // --mix: rgba(calc((var(--color-a-r) * 0.5) + (var(--color-b-r) * 0.5)), calc((var(--color-a-g) * 0.5) + (var(--color-b-g) * 0.5)), calc((var(--color-a-b) * 0.5) + (var(--color-b-b) * 0.5)), calc((var(--color-a-a) * 0.5) + (var(--color-b-a) * 0.5)));
-  // --mix-w: rgba(calc((var(--color-a-r) * 0.32) + (var(--color-b-r) * 0.68)), calc((var(--color-a-g) * 0.32) + (var(--color-b-g) * 0.68)), calc((var(--color-a-b) * 0.32) + (var(--color-b-b) * 0.68)), calc((var(--color-a-a) * 0.32) + (var(--color-b-a) * 0.68))); 
-}
+  /* output:
+    --mix: rgba(calc((var(--color-a-r) * 0.5) + (var(--color-b-r) * 0.5)), calc((var(--color-a-g) * 0.5) + (var(--color-b-g) * 0.5)), calc((var(--color-a-b) * 0.5) + (var(--color-b-b) * 0.5)), calc((var(--color-a-a) * 0.5) + (var(--color-b-a) * 0.5)));
+    --mix-w: rgba(calc((var(--color-a-r) * 0.32) + (var(--color-b-r) * 0.68)), calc((var(--color-a-g) * 0.32) + (var(--color-b-g) * 0.68)), calc((var(--color-a-b) * 0.32) + (var(--color-b-b) * 0.68)), calc((var(--color-a-a) * 0.32) + (var(--color-b-a) * 0.68)));
+  */
 }
 ```
 
