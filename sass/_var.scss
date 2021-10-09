@@ -82,11 +82,6 @@ $PROPERTIES: (
     'max': list.nth($RANGE-ALPHA, 2),
     'postfix': $POSTFIX-ALPHA
   ),
-  'weight': (
-    'unit': $UNIT-PERCENT,
-    'min': list.nth($RANGE-PERCENT, 1),
-    'max': list.nth($RANGE-PERCENT, 2),
-  ),
 );
 
 $DEFINED: ();
