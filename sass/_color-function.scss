@@ -30,7 +30,13 @@
   $ops: ();
   @each $property, $value in $kwargs {
     @if $value {
-      $ops: map.set($ops, $property, utils.calcProperty($value, $colorName, $property, $function));
+      $newOp: null;
+      @if $function == var.$MIX {
+        $newOp: utils.calcMix($colorName, $value..., $colorProp: $property);
+      } @else {
+        $newOp: utils.calcProperty($value, $colorName, $property, $function);
+      }
+      $ops: map.set($ops, $property, $newOp);
     }
   }
   @return $ops;
@@ -69,40 +75,19 @@
 }
 
 @function _parseSetArg($arg) {
+  $function: list.index(var.$FUNCTIONS, $arg) and $arg;
   $property: map.has-key(var.$PROPERTIES, $arg) and $arg;
-  $func: list.index(var.$FUNCTIONS, $arg) and $arg;
-  @if not $property and not $func {
+  @if not $function and not $property {
     @error 'Bad argument for set function: #{$arg}';
   }
-  @return $property, $func;
+  @return $function, $property;
 }
 
-// could simplify if I changed the previous function outputs and used meta.call
-@function _getOperation($colorName, $property: null, $type: null, $settings: null) {
-  @if not $property {
-    @error 'Must specify color property: #{$property} #{$type} #{$settings}';
-  }
-  @if not $type {
-    @error 'Must specify modification type: #{$property} #{$type} #{$settings}';
-  }
-  @if $type == 'mix' {
-    $colorName2: list.nth($settings, 1); // allow map as well
-    $weight: list.nth($settings, 2) or 50%;
-    $invert: $property == var.$HUE and _invertHue($colorName, $colorName2);
-    // invert option
-    @return utils.calcMix($colorName, $colorName2, $weight, $property, $modify: $invert and -360deg);
-  } @else {
-    $param: list.nth($settings, 1);
-    @return utils.calcProperty($param, $colorName, $property, $type);
-  }
-}
-
-@function set($colorName, $setMap: null, $argList...) {
-  @if not $setMap {
-    @return set($colorName, meta.keywords($argList));
-  }
+@function set($colorName, $argList...) {
+  $setMap: meta.keywords($argList);
 
   $ops: ();
+  $args: ();
   @each $key1, $value in $setMap {
     $arg1: _parseSetArg($key1);
     @if meta.type-of($value) == 'list' and meta.type-of(list.nth($value, 1) != 'list') {
@@ -112,20 +97,27 @@
       }
       $value: (#{list.nth($value, 1)}: $settings);
     }
-    // @if meta.type-of($value) == 'map' {
-    //   $value: list.zip(map.keys($value), map.values($value));
-    // }
     @each $key2, $settings in $value {
       $arg2: _parseSetArg($key2);
-      $property: list.nth($arg1, 1) or list.nth($arg2, 1);
-      $type: list.nth($arg1, 2) or list.nth($arg2, 2);
-      $ops: map.set($ops, $property, _getOperation($colorName, $property, $type, $settings));
+      $function: list.nth($arg1, 1) or list.nth($arg2, 1);
+      $property: list.nth($arg1, 2) or list.nth($arg2, 2);
+      @if list.length($settings) == 1 {
+        $settings: list.nth($settings, 1);
+      }
+      $ops: map.set($ops, $function, $property, $settings);
+      $args: map.set($args, $property, $settings);
     }
   }
 
-  $defaults: map.get(var.$COLORS, $colorName, 'defaults'); // this needs to change
-  $properties: map.merge($defaults, $ops);
-  @return clr.makeColor($properties...);
+  $colorType: args.parseKwargs($args...);
+  $colorProps: clr.defaults($colorName, $colorType);
+
+  @each $function, $propValues in $ops {
+    $newProps: _calcProperties($function, $colorName, $propValues...);
+    $colorProps: map.merge($colorProps, $newProps);
+  }
+
+  @return clr.makeColor($colorProps...);
 }
 
 @mixin define($colorMap, $parent: '', $forceAlpha: true) {
