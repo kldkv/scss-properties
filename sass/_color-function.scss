@@ -153,8 +153,9 @@
         $name-a: #{$name}#{var.$POSTFIX-ALPHA};
   
         $type: if($isAlpha, var.$HSLA, var.$HSL);
+        $defaults: clr.defaults($name, $type);
   
-        #{$name}: clr.makeColor(clr.defaults($name, $type)...);
+        #{$name}: clr.makeColor($defaults...);
         #{$name-r}: color.red($color);
         #{$name-g}: color.green($color);
         #{$name-b}: color.blue($color);
