@@ -125,7 +125,7 @@
   @return clr.makeColor($colorProps...);
 }
 
-@mixin define($colorMap, $parent: '', $forceAlpha: true) {
+@mixin define($colorMap, $parent: '', $forceAlpha: var.$FORCE-ALPHA) {
   @if (meta.type-of($colorMap) == 'map') {
     @each $colorName in map.keys($colorMap) {
       $name: #{$parent}#{$colorName};

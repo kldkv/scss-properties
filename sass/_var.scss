@@ -37,6 +37,8 @@ $POSTFIX-SATURATION: '-s' !default;
 $POSTFIX-LIGHTNESS: '-l' !default;
 $POSTFIX-ALPHA: '-a' !default;
 
+$FORCE-ALPHA: true !default;
+
 $PROPERTIES: (
   #{$RED}: (
     'unit': $UNIT-NONE,

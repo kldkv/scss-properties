@@ -5,6 +5,7 @@
   $POSTFIX-SATURATION: '-s',
   $POSTFIX-LIGHTNESS: '-l',
   $POSTFIX-ALPHA: '-a',
+  $FORCE-ALPHA: true
 );
 
 @include describe('User functions') {
