@@ -75,6 +75,7 @@
 }
 
 @function _parseSetArg($arg) {
+  $arg: #{$arg};
   $function: list.index(var.$FUNCTIONS, $arg) and $arg;
   $property: map.has-key(var.$PROPERTIES, $arg) and $arg;
   @if not $function and not $property {
