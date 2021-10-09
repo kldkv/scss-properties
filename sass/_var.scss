@@ -3,6 +3,9 @@
 $ADJUST: 'adjust';
 $CHANGE: 'change';
 $SCALE: 'scale';
+$MIX: 'mix';
+
+$FUNCTIONS: $ADJUST, $CHANGE, $SCALE, $MIX;
 
 $HUE: 'hue';
 $SATURATION: 'saturation';

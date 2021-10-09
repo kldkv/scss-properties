@@ -88,10 +88,9 @@
   @return _calcHSL($colorName, var.$SCALE, $saturation: $saturation, $lightness: $lightness, $alpha: $alpha);
 };
 
-$_functionTypes: var.$ADJUST, var.$CHANGE, var.$SCALE, 'mix';
 @function _parseSetArg($arg) {
   $property: map.has-key(var.$PROPERTIES, $arg) and $arg;
-  $func: list.index($_functionTypes, $arg) and $arg;
+  $func: list.index(var.$FUNCTIONS, $arg) and $arg;
   @if not $property and not $func {
     @error 'Bad argument for set function: #{$arg}';
   }
