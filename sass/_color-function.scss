@@ -109,7 +109,11 @@
     }
   }
 
-  $colorType: args.parseKwargs($args...);
+  // guess color type from arguments (don't need to worry about positional args)
+  $colorType: args.parseKwargs($args...) or var.$HSL;
+  @if list.length($colorType) == 3 and clr.hasAlpha($colorName) {
+    $colorType: list.append($colorType, var.$ALPHA);
+  }
   $colorProps: clr.defaults($colorName, $colorType);
 
   @each $function, $propValues in $ops {
