@@ -4,6 +4,14 @@ $ADJUST: 'adjust';
 $CHANGE: 'change';
 $SCALE: 'scale';
 
+$HUE: 'hue';
+$SATURATION: 'saturation';
+$LIGHTNESS: 'lightness';
+$ALPHA: 'alpha';
+
+$HSL: $HUE, $SATURATION, $LIGHTNESS;
+$HSLA: list.append($HSL, $ALPHA);
+
 $UNIT-DEG: 1deg;
 $UNIT-PERCENT: 1%;
 $UNIT-NONE: 1;
@@ -19,25 +27,25 @@ $POSTFIX-LIGHTNESS: '-l' !default;
 $POSTFIX-ALPHA: '-a' !default;
 
 $PROPERTIES: (
-  'hue': (
+  #{$HUE}: (
     'unit': $UNIT-DEG,
     'min': list.nth($RANGE-DEG, 1),
     'max': list.nth($RANGE-DEG, 2),
     'postfix': $POSTFIX-HUE
   ),
-  'saturation': (
+  #{$SATURATION}: (
     'unit': $UNIT-PERCENT,
     'min': list.nth($RANGE-PERCENT, 1),
     'max': list.nth($RANGE-PERCENT, 2),
     'postfix': $POSTFIX-SATURATION
   ),
-  'lightness': (
+  #{$LIGHTNESS}: (
     'unit': $UNIT-PERCENT,
     'min': list.nth($RANGE-PERCENT, 1),
     'max': list.nth($RANGE-PERCENT, 2),
     'postfix': $POSTFIX-LIGHTNESS
   ),
-  'alpha': (
+  #{$ALPHA}: (
     'unit': $UNIT-NONE,
     'min': list.nth($RANGE-ALPHA, 1),
     'max': list.nth($RANGE-ALPHA, 2),

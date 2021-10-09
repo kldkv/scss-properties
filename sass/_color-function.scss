@@ -50,10 +50,10 @@
   $invert: _invertHue($colorName1, $colorName2);
   $invert: if($invert-hue, not $invert, $invert);
   @return sass-color.makeHSL(
-    $hue:         utils.calcMix($colorName1, $colorName2, $hue or $weight, 'hue', $modify: $invert and -360deg),
-    $saturation:  utils.calcMix($colorName1, $colorName2, $saturation or $weight, 'saturation'),
-    $lightness:   utils.calcMix($colorName1, $colorName2, $lightness or $weight, 'lightness'),
-    $alpha:       utils.calcMix($colorName1, $colorName2, $alpha or $weight, 'alpha'),
+    $hue:         utils.calcMix($colorName1, $colorName2, $hue or $weight, var.$HUE, $modify: $invert and -360deg),
+    $saturation:  utils.calcMix($colorName1, $colorName2, $saturation or $weight, var.$SATURATION),
+    $lightness:   utils.calcMix($colorName1, $colorName2, $lightness or $weight, var.$LIGHTNESS),
+    $alpha:       utils.calcMix($colorName1, $colorName2, $alpha or $weight, var.$ALPHA),
   );
 }
 
@@ -110,7 +110,7 @@ $_functionTypes: var.$ADJUST, var.$CHANGE, var.$SCALE, 'mix';
     $colorName2: list.nth($settings, 1); // allow map as well
     $weight: list.nth($settings, 2) or 50%;
     $valid: _validate(($colorName, $colorName2), ('weight': $weight), $type: 'mix');
-    $invert: $property == 'hue' and _invertHue($colorName, $colorName2);
+    $invert: $property == var.$HUE and _invertHue($colorName, $colorName2);
     // invert option
     @return utils.calcMix($colorName, $colorName2, $weight, $property, $modify: $invert and -360deg);
   } @else {

@@ -5,10 +5,8 @@
 @use 'utils';
 
 @function defaults($colorName) {
-  $properties: 'hue' 'saturation' 'lightness';
-  @if map.get(var.$COLORS, $colorName, 'alpha') {
-    $properties: list.append($properties, 'alpha');
-  }
+  $hasAlpha: map.get(var.$COLORS, $colorName, 'alpha');
+  $properties: if($hasAlpha, var.$HSLA, var.$HSL);
   $ops: ();
   @each $prop in $properties {
     $ops: map.set($ops, $prop, utils.postfix($colorName, $prop));
