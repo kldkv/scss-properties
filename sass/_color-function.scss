@@ -142,7 +142,7 @@
       $isAlpha: $forceAlpha or $priorAlpha or ($isColor and color.alpha($color) != 1);
   
       @if ($isMap) {
-        @include define($color, $parent: $name);
+        @include define($color, $parent: $name, $forceAlpha: $forceAlpha);
       } @else if ($isColor) {
         $name-r: #{$name}#{var.$POSTFIX-RED};
         $name-g: #{$name}#{var.$POSTFIX-GREEN};
