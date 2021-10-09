@@ -1,57 +1,81 @@
 # scss-properties
 
-Set of mixins for theming and workflow with power of scss and css properties.
+A set of sass tools for manipulating color attributes using css properties.
+
+Based on a fork of [kldkv/scss-properties](https://github.com/kldkv/scss-properties),
+updated with new functions and to work with sass modules.
+
+## Defining properties
+
+Color properties must be declared using the `define` mixin.
 
 ```scss
-$brand: rgb(37, 100, 131);
+@use 'scss-properties/index' as prop;
 
 :root {
-  @include color\define((
-    --brand: $brand
+  @include prop.define((
+    --brand: rgb(37, 100, 131)
   ));
 }
 ```
-compile to
+
+This produces a css property for each color property.
+
 ```css
 :root {
-  --brand: hsl(var(--brand-h), var(--brand-s), var(--brand-l));
-  --brand-h: 200deg;
-  --brand-s: 56%;
-  --brand-l: 33%;
+  --brand: hsla(var(--brand-h), var(--brand-s), var(--brand-l), var(--brand-a));
+  --brand-r: 37;
+  --brand-g: 100;
+  --brand-b: 131;
+  --brand-h: 199.7872340426deg;
+  --brand-s: 55.9523809524%;
+  --brand-l: 32.9411764706%;
+  --brand-a: 1;
 }
 ```
 
-You can use nested define variables
+You can also nest define variables.
 
 ```scss
-$brand: hsl(200, 56%, 33%);
-$brand-green: green;
-
 :root {
-  @include color\define((
+  @include prop.define((
     --brand: (
-      color: $brand,
-      --green: $brand-green
+      color: hsl(200, 56%, 33%),
+      --green: green
     ),
-  ));
+  ), $forceAlpha: false);
 }
 ```
 compile to
 ```css
 :root {
   --brand: hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+  --brand-r: 37;
+  --brand-g: 100;
+  --brand-b: 131;
   --brand-h: 200deg;
   --brand-s: 56%;
   --brand-l: 33%;
-  
   --brand--green: hsl(var(--brand--green-h), var(--brand--green-s), var(--brand--green-l));
+  --brand--green-r: 0;
+  --brand--green-g: 128;
+  --brand--green-b: 0;
   --brand--green-h: 120deg;
   --brand--green-s: 100%;
-  --brand--green-l: 25.09804%;
+  --brand--green-l: 25.0980392157%;
 }
 ```
 
-You can use some function
+If you want to prevent opaque hsl or rgb colors from outputting as hsla or rgba, you set the `$FORCE-ALPHA` variable to false.
+
+```scss
+@use 'scss-properties/index' as prop with ($FORCE-ALPHA: false);
+```
+
+This is true by default because that behavior is most consistent. Even with `FORCE-ALPHA` set to false, hsl colors can output hsla properties if they share a name with a previously-defined, semi-transparent color.
+
+## Color functions
+
 ```scss
 $brand: hsl(200, 56%, 33%);
 
