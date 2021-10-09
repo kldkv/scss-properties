@@ -166,7 +166,7 @@
           #{$name-a}: color.alpha($color);
         }
 
-        var.$COLORS: map.set(var.$COLORS, $name, (
+        var.$DEFINED: map.set(var.$DEFINED, $name, (
           'color': $color,
           'alpha': $isAlpha,
         ));

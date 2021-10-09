@@ -6,7 +6,7 @@
 // returns true if any have alpha
 @function hasAlpha($colors...) {
   @each $name in $colors {
-    @if map.get(var.$COLORS, $name, 'alpha') {
+    @if map.get(var.$DEFINED, $name, 'alpha') {
       @return true;
     }
   }

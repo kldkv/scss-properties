@@ -20,7 +20,7 @@
   $min: map.get(var.$PROPERTIES, $colorProp, 'min');
   $max: map.get(var.$PROPERTIES, $colorProp, 'max');
 
-  @if $colorProp == var.$ALPHA and not map.get(var.$COLORS, $colorName, 'alpha') {
+  @if $colorProp == var.$ALPHA and not map.get(var.$DEFINED, $colorName, 'alpha') {
     // if targeting alpha for a color without an alpha value / variable
     @if not $parameter {
       @return null;
@@ -80,8 +80,8 @@
   $var1: postfix($colorName1, $colorProp);
   $var2: postfix($colorName2, $colorProp);
   @if $colorProp == var.$ALPHA {
-    $hasAlpha1: map.get(var.$COLORS, $colorName1, 'alpha');
-    $hasAlpha2: map.get(var.$COLORS, $colorName2, 'alpha');
+    $hasAlpha1: map.get(var.$DEFINED, $colorName1, 'alpha');
+    $hasAlpha2: map.get(var.$DEFINED, $colorName2, 'alpha');
     @if not $hasAlpha1 and not $hasAlpha2 {
       @return null;
     }
