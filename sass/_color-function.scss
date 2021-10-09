@@ -22,7 +22,6 @@
   @if list.length($colorType) == 3 and clr.hasAlpha($colors...) or args.hasAlpha($args...) {
     $colorType: list.append($colorType, var.$ALPHA);
   }
-  $valid: args.validate($function, $colors, $args...);
   @return $colorType;
 }
 
@@ -89,13 +88,11 @@
   @if $type == 'mix' {
     $colorName2: list.nth($settings, 1); // allow map as well
     $weight: list.nth($settings, 2) or 50%;
-    $valid: args.validate(var.$MIX, ($colorName, $colorName2), $weight: $weight);
     $invert: $property == var.$HUE and _invertHue($colorName, $colorName2);
     // invert option
     @return utils.calcMix($colorName, $colorName2, $weight, $property, $modify: $invert and -360deg);
   } @else {
     $param: list.nth($settings, 1);
-    $valid: args.validate($type, $colorName, (#{$property}: $param)...);
     @return utils.calcProperty($param, $colorName, $property, $type);
   }
 }

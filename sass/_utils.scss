@@ -4,6 +4,7 @@
 @use 'sass:math';
 @use 'sass:meta';
 @use 'sass:string';
+@use 'args';
 @use 'var';
 
 @function postfix($colorName, $colorProp) {
@@ -13,6 +14,7 @@
 }
 
 @function calcProperty($parameter, $colorName, $colorProp, $type: null) {
+  $valid: args.validate($type, $colorProp, $parameter);
   $property: postfix($colorName, $colorProp);
   $unit: map.get(var.$PROPERTIES, $colorProp, 'unit');
   $min: map.get(var.$PROPERTIES, $colorProp, 'min');
@@ -74,6 +76,7 @@
 }
 
 @function calcMix($colorName1, $colorName2, $weight, $colorProp, $modify: null) {
+  $valid: args.validate(var.$MIX, $colorProp, $weight);
   $var1: postfix($colorName1, $colorProp);
   $var2: postfix($colorName2, $colorProp);
   @if $colorProp == var.$ALPHA {
