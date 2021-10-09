@@ -211,11 +211,11 @@ The set function allows you to combine different color functions to manipulate d
 :root {
   /* property declaration... */
 
-  --set: #{props.set(--mix-a,
+  --set: #{prop.set(--color,
     $lightness: change 50%,
     $saturation: scale -50%,
     $alpha: change 1)};
-  --mix: #{props.set(--mix-a,
+  --mix: #{prop.set(--mix-a,
     $adjust: alpha -0.4,
     $mix: (
       red: --mix-b 30%,
@@ -230,7 +230,7 @@ compiles to
 :root {
   /* property definitions... */
 
-  --set: rgba(calc((var(--mix-a-r) * 0.3) + (var(--mix-b-r) * 0.7)), calc((var(--mix-a-g) * 1) + (var(--mix-b-g) * 0)), calc((var(--mix-a-b) * 0.6) + (var(--mix-b-b) * 0.4)), calc(var(--mix-a-a) + -0.4));
-  --mix: hsla(var(--mix-a-h), calc(var(--mix-a-s) + ((var(--mix-a-s) - 0%) * -0.5)), 50%, 1);
+  --set: hsla(var(--color-h), calc(var(--color-s) + ((var(--color-s) - 0%) * -0.5)), 50%, 1);
+  --mix: rgba(calc((var(--mix-a-r) * 0.3) + (var(--mix-b-r) * 0.7)), calc((var(--mix-a-g) * 1) + (var(--mix-b-g) * 0)), calc((var(--mix-a-b) * 0.6) + (var(--mix-b-b) * 0.4)), 0.6);
 }
 ```
