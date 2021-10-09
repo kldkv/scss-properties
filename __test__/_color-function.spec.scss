@@ -484,4 +484,81 @@
       @include assert-equal($output, $expect);
     }
   }
+
+  @include describe('set') {
+    @include it('adjusts using a function keyword and list arguments') {
+      $output: props.set(--color, $adjust: 'green' -139.829);
+      $expect: 'rgba(var(--color-r), calc(var(--color-g) + -139.829), var(--color-b), var(--color-a))';
+      @include assert-equal($output, $expect);
+    }
+    @include it('changes using a function keyword and map arguments') {
+      $output: props.set(--color, $change: ('saturation': 27.4));
+      $expect: 'hsla(var(--color-h), 27.4%, var(--color-l), var(--color-a))';
+      @include assert-equal($output, $expect);
+    }
+    @include it('scales using a property keyword and list arguments') {
+      $output: props.set(--color, $alpha: 'scale' 2.94%);
+      $expect: 'hsla(var(--color-h), var(--color-s), var(--color-l), calc(var(--color-a) + ((1 - var(--color-a)) * 0.0294)))';
+      @include assert-equal($output, $expect);
+    }
+    @include it('scales using a property keyword and map arguments') {
+      $output: props.set(--color, $red: ('scale': 74%));
+      $expect: 'rgba(calc(var(--color-r) + ((255 - var(--color-r)) * 0.74)), var(--color-g), var(--color-b), var(--color-a))';
+      @include assert-equal($output, $expect);
+    }
+    @include it('adjusts using a color name as a list arguments') {
+      $output: props.set(--color, $adjust: green -139.829);
+      $expect: 'rgba(var(--color-r), calc(var(--color-g) + -139.829), var(--color-b), var(--color-a))';
+      @include assert-equal($output, $expect);
+    }
+    @include it('adjusts using a color name as a map key') {
+      $output: props.set(--color, $adjust: (green: -139.829));
+      $expect: 'rgba(var(--color-r), calc(var(--color-g) + -139.829), var(--color-b), var(--color-a))';
+      @include assert-equal($output, $expect);
+    }
+    @include it('mixes using a function keyword and list arguments') {
+      $output: props.set(--mix-a, $mix: 'green' --mix-b 40%);
+      $expect: 'rgba(var(--mix-a-r), calc((var(--mix-a-g) * 0.4) + (var(--mix-b-g) * 0.6)), var(--mix-a-b), var(--mix-a-a))';
+      @include assert-equal($output, $expect);
+    }
+    @include it('mixes using a function keyword and map arguments') {
+      $output: props.set(--mix-a, $mix: ('green': --mix-b 40%));
+      $expect: 'rgba(var(--mix-a-r), calc((var(--mix-a-g) * 0.4) + (var(--mix-b-g) * 0.6)), var(--mix-a-b), var(--mix-a-a))';
+      @include assert-equal($output, $expect);
+    }
+    @include it('mixes using a property keyword and list arguments') {
+      $output: props.set(--mix-a, $green: 'mix' --mix-b 40%);
+      $expect: 'rgba(var(--mix-a-r), calc((var(--mix-a-g) * 0.4) + (var(--mix-b-g) * 0.6)), var(--mix-a-b), var(--mix-a-a))';
+      @include assert-equal($output, $expect);
+    }
+    @include it('mixes using a property keyword and deep map arguments') {
+      $output: props.set(--mix-a, $green: ('mix': (
+        'weight': 40%,
+        'colorName2': --mix-b)));
+      $expect: 'rgba(var(--mix-a-r), calc((var(--mix-a-g) * 0.4) + (var(--mix-b-g) * 0.6)), var(--mix-a-b), var(--mix-a-a))';
+      @include assert-equal($output, $expect);
+    }
+    @include it('sets multiple properties using a function keyword') {
+      $output: props.set(--mix-a,
+        $adjust: alpha -0.4,
+        $mix: (
+          red: --mix-b 30%,
+          green: --mix-b 100%,
+          blue: --mix-b 60% ));
+      $expect: 'rgba(calc((var(--mix-a-r) * 0.3) + (var(--mix-b-r) * 0.7)), calc((var(--mix-a-g) * 1) + (var(--mix-b-g) * 0)), calc((var(--mix-a-b) * 0.6) + (var(--mix-b-b) * 0.4)), calc(var(--mix-a-a) + -0.4))';
+      @include assert-equal($output, $expect);
+    }
+    @include it('sets multiple properties using property keywords') {
+      $output: props.set(--mix-a,
+        $lightness: change 50%,
+        $saturation: scale -50%,
+        $alpha: change 1);
+      $expect: 'hsla(var(--mix-a-h), calc(var(--mix-a-s) + ((var(--mix-a-s) - 0%) * -0.5)), 50%, 1)';
+      @include assert-equal($output, $expect);
+    }
+    @include it('sets nothing with empty arguments') {
+      $output: props.set(--color);
+      $expect: 'hsla(var(--color-h), var(--color-s), var(--color-l), var(--color-a))';
+    }
+  }
 }
