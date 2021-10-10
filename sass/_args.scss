@@ -1,4 +1,3 @@
-@use '../node_modules/sass-true/sass/throw';
 @use 'sass:list';
 @use 'sass:map';
 @use 'sass:math';
@@ -61,7 +60,7 @@
 
   @if $rgb and $hsl {
     $kwarglist: list.zip(map.keys($kwargs), map.values($kwargs));
-    @return throw.error('Both RGB and HSL arguments supplied: #{$kwarglist}', 'parseKwargs()');
+    @error 'Both RGB and HSL arguments supplied: #{$kwarglist}', 'parseKwargs()';
   }
 
   @if $hasAlpha and $rgb {
@@ -85,7 +84,7 @@
   $positional: list.zip($colorProps, $args);
   @each $k, $v in $positional {
     @if map.has-key($kwargs, $k) {
-      @return throw.error('#{$k} declared twice', 'normalize()');
+      @error '#{$k} declared twice', 'normalize()';
     }
     $argMap: map.set($argMap, $k, $v);
   }
