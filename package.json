@@ -6,8 +6,8 @@
   "homepage": "https://github.com/kldkv/scss-properties",
   "bugs": "https://github.com/kldkv/scss-properties/issues",
   "scripts": {
-    "test": "jest --env=node",
-    "test:watch": "jest --env=node --watch"
+    "test": "npx jest --env=node",
+    "test:watch": "npx jest --env=node --watch"
   },
   "engines": {
     "node": ">=10.0.0"
