@@ -113,7 +113,8 @@
     $rangeValue: if($allowNegative, math.abs($value), $value);
     $unitTest: $unitTest and $min <= $rangeValue and $rangeValue <= $max;
   }
-  @if not (meta.type-of($value) == 'string' or $unitTest) {
+  $valueType: meta.type-of($value);
+  @if not ($valueType == 'string' or $valueType == 'calculation' or $unitTest) {
     @error 'Invalid #{$property} value for #{$function} function: #{$value}';
   }
   @return true;

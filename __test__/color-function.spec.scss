@@ -484,6 +484,12 @@
       $expect: 'rgba(calc((var(--mix-a-r) * 0.14) + (var(--mix-b-r) * 0.86)), calc((var(--mix-a-g) * 0.6) + (var(--mix-b-g) * 0.4)), calc((var(--mix-a-b) * 0.7453) + (var(--mix-b-b) * 0.2547)), calc((var(--mix-a-a) * 0) + (var(--mix-b-a) * 1)))';
       @include assert-equal($output, $expect);
     }
+    @include it('mixes a calculated scale') {
+      $lightness-scale: calc(0.9 - (0.15 * var(--theme-light)));
+      $output: props.mix(--mix-a, --mix-b, $lightness: $lightness-scale);
+      $expect: 'hsla(calc((var(--mix-a-h) * 0.5) + (var(--mix-b-h) * 0.5)), calc((var(--mix-a-s) * 0.5) + (var(--mix-b-s) * 0.5)), calc((var(--mix-a-l) * calc(0.9 - 0.15 * var(--theme-light))) + (var(--mix-b-l) * (1 - calc(0.9 - 0.15 * var(--theme-light))))), calc((var(--mix-a-a) * 0.5) + (var(--mix-b-a) * 0.5)))';
+      @include assert-equal($output, $expect);
+    }
   }
 
   @include describe('set') {
