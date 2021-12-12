@@ -1,6 +1,6 @@
 {
   "name": "scss-properties",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Facilitates the work of scss / sass to work with css properties",
   "main": "index.scss",
   "homepage": "https://github.com/kldkv/scss-properties",
