@@ -1,64 +1,194 @@
-@import 'var';
-@import 'utils';
+@use 'sass:color';
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'var';
+@use 'args';
+@use 'utils';
+@use 'color' as clr;
 
-@function color\adjust($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
-  $hue-color:        _calcProperty($hue, $colorName, $POSTFIX-HUE, $UNIT-DEG, $ADJUST);
-  $saturation-color: _calcProperty($saturation, $colorName, $POSTFIX-SATURATION, $UNIT-PERCENT, $ADJUST);
-  $lightness-color:  _calcProperty($lightness, $colorName, $POSTFIX-LIGHTNESS, $UNIT-PERCENT, $ADJUST);
-  $alpha-color:      _calcPropertyAlpha($alpha, $color, $colorName, $ADJUST);
+// returns properties for color output based on function, arguments, and color name
+@function _getColorType($function, $colors, $args...) {
+  $colorType: args.parseKwargs($args...);
+  @if not $colorType {
+    @if $function == var.$SCALE {
+      $colorType: var.$HSL;
+    } @else if $function == var.$MIX {
+      $colorType: var.$RGB;
+    } @else {
+      $colorType: args.parsePositional($args...) or var.$HSL;
+    }
+  }
+  @if list.length($colorType) == 3 and clr.hasAlpha($colors...) or args.hasAlpha($args...) {
+    $colorType: list.append($colorType, var.$ALPHA);
+  }
+  @return $colorType;
+}
 
-  @return _makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
+// returns a map of property names and css color values based on kwargs
+@function _setProperties($function, $colorName, $args...) {
+  $kwargs: meta.keywords($args);
+  $ops: ();
+  @each $property, $value in $kwargs {
+    @if $value {
+      $newOp: null;
+      @if $function == var.$MIX {
+        $newOp: utils.calcMix($property, $colorName, $value...);
+      } @else {
+        $newOp: utils.calcProperty($function, $colorName, $property, $value);
+      }
+      $ops: map.set($ops, $property, $newOp);
+    }
+  }
+  @return $ops;
+}
+
+// returns a color calculated from css properties
+// using the function type, color name, and a variable arguments list
+@function _makeColor($function, $colorName, $args...) {
+  $colorType: _getColorType($function, $colorName, $args...);
+  $kwargs: args.normalize($colorType, $args...);
+  $defaults: clr.defaults($colorName, $colorType);
+  $properties: _setProperties($function, $colorName, $kwargs...);
+  $properties: map.merge($defaults, $properties);
+  @return clr.makeColor($properties...);
+}
+
+// accessible alias functions for invoking _makeColor
+@function adjust($colorName, $args...) {
+  @return _makeColor(var.$ADJUST, $colorName, $args...);
+}
+
+@function change($colorName, $args...) {
+  @return _makeColor(var.$CHANGE, $colorName, $args...);
 };
 
-@function color\change($colorName, $color, $hue: null, $saturation: null, $lightness: null, $alpha: null) {
-  $hue-color:        _calcProperty($hue, $colorName, $POSTFIX-HUE, $UNIT-DEG, $CHANGE);
-  $saturation-color: _calcProperty($saturation, $colorName, $POSTFIX-SATURATION, $UNIT-PERCENT, $CHANGE);
-  $lightness-color:  _calcProperty($lightness, $colorName, $POSTFIX-LIGHTNESS, $UNIT-PERCENT, $CHANGE);
-  $alpha-color:      _calcPropertyAlpha($alpha, $color, $colorName, $CHANGE);
-
-  @return _makeHSL($hue: $hue-color, $saturation: $saturation-color, $lightness: $lightness-color, $alpha: $alpha-color);
+@function scale($colorName, $args...) {
+  @return _makeColor(var.$SCALE, $colorName, $args...);
 };
 
-@mixin color\define($colorMap, $parent: '') {
-  @if (type-of($colorMap) == 'map') {
-    @each $colorName in map-keys($colorMap) {
+// returns a color calculated by mixing css properties
+// defaults to rgb unless hsl properties are specified in kwargs
+@function mix($colorName1, $colorName2, $weight: 50%, $args...) {
+  $colorType: _getColorType(var.$MIX, ($colorName1 $colorName2), $weight: $weight, $args...);
+  $kwargs: args.normalize($colorType, $args...);
+  $ops: ();
+  @each $property in $colorType {
+    $w: map.get($kwargs, $property) or $weight;
+    $ops: map.set($ops, $property, utils.calcMix($property, $colorName1, $colorName2, $w));
+  }
+  @return clr.makeColor($ops...);
+}
+
+// parses an argument for the set() function as
+// either a function or property identifier
+@function _parseSetArg($arg) {
+  $arg: #{$arg};
+  $function: list.index(var.$FUNCTIONS, $arg) and $arg;
+  $property: map.has-key(var.$PROPERTIES, $arg) and $arg;
+  @if not $function and not $property {
+    @error 'Bad argument for set function: #{$arg}';
+  }
+  @return $function, $property;
+}
+
+// takes a variable arguments map to return a css color using
+// a mix of the above methods for manipulating color values
+@function set($colorName, $argList...) {
+  $kwargs: meta.keywords($argList);
+
+  $ops: ();
+  $args: ();
+  @each $key1, $value in $kwargs {
+    // parse kwargs with either function or property name as first value
+    $arg1: _parseSetArg($key1);
+    @if meta.type-of($value) == 'list' and meta.type-of(list.nth($value, 1) != 'list') {
+      // in order to allow second values to be supplied as a list
+      $settings: ();
+      @for $i from 2 through list.length($value) {
+        $settings: list.append($settings, list.nth($value, $i));
+      }
+      $value: (#{list.nth($value, 1)}: $settings);
+    }
+    @each $key2, $settings in $value {
+      $arg2: _parseSetArg($key2);
+      $function: list.nth($arg1, 1) or list.nth($arg2, 1);
+      $property: list.nth($arg1, 2) or list.nth($arg2, 2);
+      @if list.length($settings) == 1 {
+        $settings: list.nth($settings, 1); // otherwise functions can't identify argument type
+      }
+      $ops: map.set($ops, $function, $property, $settings);
+      $args: map.set($args, $property, $settings);
+    }
+  }
+
+  // guess color type from arguments (don't need to worry about positional args)
+  $colorType: args.parseKwargs($args...) or var.$HSL;
+  @if list.length($colorType) == 3 and clr.hasAlpha($colorName) {
+    $colorType: list.append($colorType, var.$ALPHA);
+  }
+  $colorProps: clr.defaults($colorName, $colorType);
+
+  @each $function, $propValues in $ops {
+    $newProps: _setProperties($function, $colorName, $propValues...);
+    $colorProps: map.merge($colorProps, $newProps);
+  }
+
+  @return clr.makeColor($colorProps...);
+}
+
+// defines separate css properties for each color property, to allow manipulation
+// also saves whether the color has an alpha value, to pick smart color outputs
+@mixin define($colorMap, $parent: '', $forceAlpha: var.$FORCE-ALPHA) {
+  @if (meta.type-of($colorMap) == 'map') {
+    @each $colorName in map.keys($colorMap) {
       $name: #{$parent}#{$colorName};
   
       @if ($colorName == 'color') {
         $name: #{$parent};
       }
   
-      $color: map-get($colorMap, $colorName);
+      $color: map.get($colorMap, $colorName);
   
-      $isColor: type-of($color) == 'color';
-      $isMap: type-of($color) == 'map';
-      $isAlpha: $isColor and alpha($color) != 1;
+      $isColor: meta.type-of($color) == 'color';
+      $isMap: meta.type-of($color) == 'map';
+      $priorAlpha: clr.hasAlpha($colorName); // if a previously defined alpha color shares the same name, alpha must be true
+      $isAlpha: $forceAlpha or $priorAlpha or ($isColor and color.alpha($color) != 1);
   
       @if ($isMap) {
-        @include color\define($color, $name);
+        @include define($color, $parent: $name, $forceAlpha: $forceAlpha);
       } @else if ($isColor) {
-        $name-h: #{$name}#{$POSTFIX-HUE};
-        $name-s: #{$name}#{$POSTFIX-SATURATION};
-        $name-l: #{$name}#{$POSTFIX-LIGHTNESS};
-        $name-a: #{$name}#{$POSTFIX-ALPHA};
+        $name-r: #{$name}#{var.$POSTFIX-RED};
+        $name-g: #{$name}#{var.$POSTFIX-GREEN};
+        $name-b: #{$name}#{var.$POSTFIX-BLUE};
+        $name-h: #{$name}#{var.$POSTFIX-HUE};
+        $name-s: #{$name}#{var.$POSTFIX-SATURATION};
+        $name-l: #{$name}#{var.$POSTFIX-LIGHTNESS};
+        $name-a: #{$name}#{var.$POSTFIX-ALPHA};
   
+        // use hsl values to control color (to-do: allow rgb through a setting)
+        $type: if($isAlpha, var.$HSLA, var.$HSL);
+        $defaults: clr.defaults($name, $type);
+  
+        #{$name}: clr.makeColor($defaults...);
+        #{$name-r}: color.red($color);
+        #{$name-g}: color.green($color);
+        #{$name-b}: color.blue($color);
+        #{$name-h}: color.hue($color);
+        #{$name-s}: color.saturation($color);
+        #{$name-l}: color.lightness($color);
         @if ($isAlpha) {
-          #{$name}: _makeHSL(var($name-h), var($name-s), var($name-l), var($name-a));
-  
-        } @else {
-          #{$name}: _makeHSL(var($name-h), var($name-s), var($name-l));
+          #{$name-a}: color.alpha($color);
         }
-  
-        #{$name-h}: hue($color);
-        #{$name-s}: saturation($color);
-        #{$name-l}: lightness($color);
-  
-        @if ($isAlpha) {
-          #{$name-a}: alpha($color);
-        }
+
+        var.$DEFINED: map.set(var.$DEFINED, $name, (
+          'color': $color,
+          'alpha': $isAlpha,
+        ));
       } @else {
         #{$name}: $color;
       }
     }
-  };
-};
+  }
+}

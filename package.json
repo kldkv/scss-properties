@@ -1,8 +1,8 @@
 {
   "name": "scss-properties",
-  "version": "0.1.0",
-  "description": "Facilitates the work of scss / sass to work with css properties",
-  "main": "index.scss",
+  "version": "0.2.2",
+  "description": "A set of sass tools for manipulating color attributes using CSS properties.",
+  "main": "_index.scss",
   "homepage": "https://github.com/kldkv/scss-properties",
   "bugs": "https://github.com/kldkv/scss-properties/issues",
   "scripts": {
@@ -13,7 +13,7 @@
     "node": ">=10.0.0"
   },
   "files": [
-    "index.scss",
+    "_index.scss",
     "sass/",
     "README.md"
   ],
@@ -30,11 +30,17 @@
     "mixin"
   ],
   "author": "Alexander Kladkov",
+  "contributors": [
+    "Dylan Awalt-Conley"
+  ],
   "license": "MIT",
+  "peerDependencies": {
+    "sass": "^1.33.0"
+  },
   "devDependencies": {
     "glob": "^7.1.4",
-    "jest": "^24.8.0",
-    "sass": "^1.41.0",
+    "jest": "^27.2.5",
+    "sass": "^1.45.0",
     "sass-true": "^6.0.1"
   }
 }

@@ -1,0 +1,121 @@
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'var';
+
+// check whether a function's *arguments* specify an alpha value
+@function hasAlpha($args...) {
+  $kwargs: meta.keywords($args);
+  @return map.has-key($kwargs, var.$ALPHA) or list.length($args) == 4;
+}
+
+// try to guess color properties based on positional arguments
+@function parsePositional($args...) {
+  $kwargs: meta.keywords($args);
+  @if list.length($args) == 0 {
+    @return null;
+  }
+
+  $hasAlpha: hasAlpha($args...);
+  $rgb: false; $hsl: false;
+
+  @each $arg in $args {
+    @if meta.type-of($arg) == 'number' {
+      @if math.is-unitless($arg) {
+        $rgb: true;
+      } @else {
+        $hsl: true;
+      }
+    }
+  }
+
+  // return hsl if *any* args have units
+  @if $hasAlpha and $hsl {
+    @return var.$HSLA;
+  } @else if $hsl {
+    @return var.$HSL;
+  } @else if $hasAlpha and $rgb {
+    @return var.$RGBA;
+  } @else if $rgb {
+    @return var.$RGB;
+  }
+
+  // return null if no args are numbers
+  @return null;
+}
+
+// try to guess color properties based on keyword arguments
+@function parseKwargs($args...) {
+  $kwargs: meta.keywords($args);
+  $rgb: false; $hsl: false;
+  $hasAlpha: hasAlpha($args...);
+  @each $property in map.keys($kwargs) {
+    @if list.index(var.$RGB, $property) {
+      $rgb: true;
+    } @else if list.index(var.$HSL, $property) {
+      $hsl: true;
+    }
+  }
+
+  @if $rgb and $hsl {
+    $kwarglist: list.zip(map.keys($kwargs), map.values($kwargs));
+    @error 'Both RGB and HSL arguments supplied: #{$kwarglist}', 'parseKwargs()';
+  }
+
+  @if $hasAlpha and $rgb {
+    @return var.$RGBA;
+  } @else if $hasAlpha and $hsl {
+    @return var.$HSLA;
+  } @else if $rgb {
+    @return var.$RGB;
+  } @else if $hsl {
+    @return var.$HSL;
+  }
+
+  @return null;
+}
+
+// return positional, keyword, or mixed arguments as a keyword argument map
+@function normalize($colorProps, $args...) {
+  $kwargs: meta.keywords($args);
+  $argMap: ();
+
+  $positional: list.zip($colorProps, $args);
+  @each $k, $v in $positional {
+    @if map.has-key($kwargs, $k) {
+      @error '#{$k} declared twice', 'normalize()';
+    }
+    $argMap: map.set($argMap, $k, $v);
+  }
+  @return map.merge($argMap, $kwargs);
+}
+
+// throw an error if an argument does not fit the expected type and range
+@function validate($function, $property, $value) {
+  $value: list.nth($value, 1);
+  $unit: map.get(var.$PROPERTIES, $property, 'unit');
+  $min: map.get(var.$PROPERTIES, $property, 'min');
+  $max: map.get(var.$PROPERTIES, $property, 'max');
+  @if $function == var.$SCALE or $function == var.$MIX {
+    $unit: var.$UNIT-PERCENT;
+    $min: list.nth(var.$RANGE-PERCENT, 1);
+    $max: list.nth(var.$RANGE-PERCENT, 2);
+  }
+
+  $isNumber: meta.type-of($value) == 'number';
+  $unitTest: $isNumber and math.is-unitless($value);
+  @if ($isNumber and not math.is-unitless($unit)) {
+    $unitTest: $unitTest or math.compatible($value, $unit);
+  }
+  @if ($isNumber) {
+    $allowNegative: $function and $function == var.$ADJUST or $function == var.$SCALE;
+    $rangeValue: if($allowNegative, math.abs($value), $value);
+    $unitTest: $unitTest and $min <= $rangeValue and $rangeValue <= $max;
+  }
+  $valueType: meta.type-of($value);
+  @if not ($valueType == 'string' or $valueType == 'calculation' or $unitTest) {
+    @error 'Invalid #{$property} value for #{$function} function: #{$value}';
+  }
+  @return true;
+}

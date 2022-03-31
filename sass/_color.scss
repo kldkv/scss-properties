@@ -1,7 +1,49 @@
-@function _makeHSL($hue: null, $saturation: null, $lightness: null, $alpha: null) {
-  @if ($alpha) {
-    @return #{unquote('hsla(#{$hue}, #{$saturation}, #{$lightness}, #{$alpha})')}
+@use 'sass:map';
+@use 'args';
+@use 'var';
+@use 'utils';
+
+// returns true if any colors were defined with alpha values
+// consider throwing error if colors are not defined
+@function hasAlpha($colors...) {
+  @each $name in $colors {
+    @if map.get(var.$DEFINED, $name, 'alpha') {
+      @return true;
+    }
+  }
+  @return false;
+}
+
+// returns a map of default values based on color properties
+// mostly this looks like: (red: var(--color-r)), etc...
+@function defaults($colorName, $properties: var.$HSL) {
+  $ops: ();
+  @each $property in $properties {
+    $ops: map.set($ops, $property, utils.postfix($colorName, $property));
+  }
+  @return $ops;
+}
+
+// return a css color based on a variable arguments list of property values
+@function makeColor($args...) {
+  $type: args.parseKwargs($args...) or args.parsePositional($args...);
+  @if not $type {
+    @if args.hasAlpha($args...) {
+      $type: var.$HSLA;
+    } @else {
+      $type: var.$HSL;
+    }
   }
 
-  @return #{unquote('hsl(#{$hue}, #{$saturation}, #{$lightness})')};
+  @if $type == var.$RGBA {
+    @return rgba($args...);
+  } @else if $type == var.$RGB {
+    @return rgb($args...);
+  } @else if $type == var.$HSLA {
+    @return hsla($args...);
+  } @else if $type == var.$HSL {
+    @return hsl($args...);
+  }
+
+  @return $type;
 }

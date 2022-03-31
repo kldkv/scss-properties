@@ -1,10 +1,87 @@
+@use 'sass:list';
+
 $ADJUST: 'adjust';
 $CHANGE: 'change';
+$SCALE: 'scale';
+$MIX: 'mix';
 
-$UNIT-DEG: 'deg';
-$UNIT-PERCENT: '%';
+$FUNCTIONS: $ADJUST, $CHANGE, $SCALE, $MIX;
 
+$RED: 'red';
+$GREEN: 'green';
+$BLUE: 'blue';
+$HUE: 'hue';
+$SATURATION: 'saturation';
+$LIGHTNESS: 'lightness';
+$ALPHA: 'alpha';
+
+$RGB: $RED, $GREEN, $BLUE;
+$HSL: $HUE, $SATURATION, $LIGHTNESS;
+$RGBA: list.append($RGB, $ALPHA);
+$HSLA: list.append($HSL, $ALPHA);
+
+$UNIT-DEG: 1deg;
+$UNIT-PERCENT: 1%;
+$UNIT-NONE: 1;
+
+$RANGE-RGB: 0 255;
+$RANGE-DEG: 0deg 360deg;
+$RANGE-PERCENT: 0% 100%;
+$RANGE-ALPHA: 0 1;
+
+$POSTFIX-RED: '-r' !default;
+$POSTFIX-GREEN: '-g' !default;
+$POSTFIX-BLUE: '-b' !default;
 $POSTFIX-HUE: '-h' !default;
 $POSTFIX-SATURATION: '-s' !default;
 $POSTFIX-LIGHTNESS: '-l' !default;
 $POSTFIX-ALPHA: '-a' !default;
+
+$FORCE-ALPHA: true !default;
+
+$PROPERTIES: (
+  #{$RED}: (
+    'unit': $UNIT-NONE,
+    'min': list.nth($RANGE-RGB, 1),
+    'max': list.nth($RANGE-RGB, 2),
+    'postfix': $POSTFIX-RED
+  ),
+  #{$GREEN}: (
+    'unit': $UNIT-NONE,
+    'min': list.nth($RANGE-RGB, 1),
+    'max': list.nth($RANGE-RGB, 2),
+    'postfix': $POSTFIX-GREEN
+  ),
+  #{$BLUE}: (
+    'unit': $UNIT-NONE,
+    'min': list.nth($RANGE-RGB, 1),
+    'max': list.nth($RANGE-RGB, 2),
+    'postfix': $POSTFIX-BLUE
+  ),
+  #{$HUE}: (
+    'unit': $UNIT-DEG,
+    'min': list.nth($RANGE-DEG, 1),
+    'max': list.nth($RANGE-DEG, 2),
+    'postfix': $POSTFIX-HUE
+  ),
+  #{$SATURATION}: (
+    'unit': $UNIT-PERCENT,
+    'min': list.nth($RANGE-PERCENT, 1),
+    'max': list.nth($RANGE-PERCENT, 2),
+    'postfix': $POSTFIX-SATURATION
+  ),
+  #{$LIGHTNESS}: (
+    'unit': $UNIT-PERCENT,
+    'min': list.nth($RANGE-PERCENT, 1),
+    'max': list.nth($RANGE-PERCENT, 2),
+    'postfix': $POSTFIX-LIGHTNESS
+  ),
+  #{$ALPHA}: (
+    'unit': $UNIT-NONE,
+    'min': list.nth($RANGE-ALPHA, 1),
+    'max': list.nth($RANGE-ALPHA, 2),
+    'postfix': $POSTFIX-ALPHA
+  ),
+);
+
+$DEFINED: ();

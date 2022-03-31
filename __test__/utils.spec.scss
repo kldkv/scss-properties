@@ -1,93 +1,11 @@
-@import 'true';
-@import 'var';
-@import 'utils';
+@use '../node_modules/sass-true/sass/true' as *;
 
-@import '../sass/utils';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'sass:string';
+@use 'var';
+@use '../sass/utils';
 
 @include describe('utils') {
-  @include it('Correct create var()') {
-    $r: unique-id();
-    $name: --#{$r};
-
-    @include assert-equal(_var($name), 'var(--#{$r})');
-  };
-
-  @include it('Correct create calc()') {
-    $r: unique-id();
-
-    @include assert-equal(_calc($r), 'calc(#{$r})');
-  };
-
-  @include it('Correct create calc() with var()') {
-    $r: unique-id();
-    $name: --#{$r};
-    $var: _var($name);
-
-    @include assert-equal(_calc(_var($name)), 'calc(var(--#{$r}))');
-  };
-  
-  @include it('Correct create calc() with var()') {
-    $r: unique-id();
-    $name: --#{$r};
-    $var: _var($name);
-
-    @include assert-equal(_calc(_var($name)), 'calc(var(--#{$r}))');
-  };
-
-  @include it('Correct convert to value to unit') {
-    $units: (
-      '%': 0%,
-      'ch': 0ch,
-      'cm': 0cm,
-      'deg': 0deg,
-      'em': 0em,
-      'ex': 0ex,
-      'grad': 0grad,
-      'Hz': 0Hz,
-      'in': 0in,
-      'kHz': 0kHz,
-      'mm': 0mm,
-      'ms': 0ms,
-      'pc': 0pc,
-      'pt': 0pt,
-      'px': 0px,
-      'q': 0q,
-      'rad': 0rad,
-      'rem': 0rem,
-      's': 0s,
-      'turn': 0turn,
-      'vh': 0vh,
-      'vmax': 0vmax,
-      'vmin': 0vmin,
-      'vw': 0vw,
-    );
-    
-    @each $key, $zero-unit in $units {
-      $r: random($limit: $MAX-INTEGER);
-      $value: flip($r, -$r);
-
-      @include assert-equal(_to-unit($value, $key), $value + $zero-unit);
-    }
-  };
-
-  @include it('Correct convert to number') {
-    @for $var from 1 to 10 {
-      $r: random($limit: $MAX-INTEGER);
-      $float: flip($r + random(), $r);
-      $value: flip($float, -$float);
-  
-      $string: inspect($value);
-  
-      @include assert-equal(_to-number($string), $value, $inspect: true);
-    }
-  };
-
-  @include it('Correct string replace') {
-    $s: 'var(--brand-color)';
-    $s-exp: '--brand-color)';
-    $s-exp-exp: '--brand-color';
-
-    @include assert-equal(_str-replace($s, 'var('), $s-exp);
-    @include assert-equal(_str-replace($s-exp, ')'), $s-exp-exp);
-  }
+  // to-do
 }
