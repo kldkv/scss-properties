@@ -1,7 +1,7 @@
 {
   "name": "scss-properties",
   "version": "0.2.1",
-  "description": "Facilitates the work of scss / sass to work with css properties",
+  "description": "A set of sass tools for manipulating color attributes using CSS properties.",
   "main": "_index.scss",
   "homepage": "https://github.com/kldkv/scss-properties",
   "bugs": "https://github.com/kldkv/scss-properties/issues",
