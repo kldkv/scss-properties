@@ -30,6 +30,9 @@
     "mixin"
   ],
   "author": "Alexander Kladkov",
+  "contributors": [
+    "Dylan Awalt-Conley"
+  ],
   "license": "MIT",
   "peerDependencies": {
     "sass": "^1.33.0"
