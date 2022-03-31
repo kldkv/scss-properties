@@ -2,9 +2,6 @@
 
 A set of sass tools for manipulating color attributes using CSS properties.
 
-Based on a fork of [kldkv/scss-properties](https://github.com/kldkv/scss-properties),
-updated with new functions and to work with sass modules.
-
 ## Defining properties
 
 Color properties must be declared using the `define` mixin, which produces a separate CSS property for each color property.
@@ -70,7 +67,9 @@ This is true by default because it's safest to assume hsla output if _any_ semi-
 
 ## Color functions
 
-This project provides several functions for manipulating the color attributes of CSS properties. Most of these functions mimic the API and behavior of the [sass color function](https://sass-lang.com/documentation/modules/color) they share a name with. The `$whiteness` and `$blackness` arguments are currently not supported because no browsers have implemented the proposed `hwb()` CSS function.
+This project provides several functions for manipulating the color attributes of CSS properties. These functions mimic the API and behavior of the [sass color function](https://sass-lang.com/documentation/modules/color) that they share a name with.
+
+The `$whiteness` and `$blackness` arguments are currently not supported because no browsers have implemented the proposed `hwb()` CSS function.
 
 ### Adjust
 
