@@ -7,7 +7,7 @@ A set of sass tools for manipulating color attributes using CSS properties.
 Color properties must be declared using the `define` mixin, which produces a separate CSS property for each color property.
 
 ```scss
-@use 'scss-properties/index' as prop;
+@use 'scss-properties' as prop;
 
 :root {
   @include prop.define((
@@ -60,7 +60,7 @@ You can also nest define variables.
 If you want to prevent opaque hsl or rgb colors from outputting as hsla or rgba, you can set the global `$FORCE-ALPHA` variable to false.
 
 ```scss
-@use 'scss-properties/index' as prop with ($FORCE-ALPHA: false);
+@use 'scss-properties' as prop with ($FORCE-ALPHA: false);
 ```
 
 This is true by default because it's safest to assume hsla output if _any_ semi-transparent colors are used. Even with `$FORCE-ALPHA` set to false, hsl colors will sometimes output hsla properties: for example, if they share a name with a previously-defined, semi-transparent color.
